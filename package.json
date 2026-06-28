@@ -1,0 +1,5 @@
+{
+  "name": "proyecto-bienesraices1",
+  "private": true,
+  "workspaces": ["apps/*"]
+}

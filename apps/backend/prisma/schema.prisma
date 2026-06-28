@@ -1,0 +1,137 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Rol {
+  asesor
+  admin
+}
+
+enum TipoPropiedad {
+  casa
+  departamento
+  terreno
+  local
+  oficina
+}
+
+enum TipoTransaccion {
+  venta
+  alquiler
+}
+
+enum EstadoPropiedad {
+  activa
+  pausada
+  vendida
+  alquilada
+}
+
+enum TipoMensaje {
+  contacto
+  venta
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  rol       Rol
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  asesor Asesor?
+}
+
+model Asesor {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  nombre           String
+  telefono         String
+  foto             String?
+  especialidad     String?
+  descripcion      String?
+  añosExperiencia  Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id])
+  propiedades Propiedad[]
+  mensajes    Mensaje[]
+}
+
+model Propiedad {
+  id               String   @id @default(uuid())
+  titulo           String
+  descripcion      String
+  precio           Float
+  tipoPropiedad    TipoPropiedad
+  tipoTransaccion  TipoTransaccion
+  habitaciones     Int?
+  banios           Int?
+  parqueos         Int?
+  metrajeTotal     Float?
+  metrajeConstruido Float?
+  estado           EstadoPropiedad  @default(activa)
+  destacada        Boolean          @default(false)
+  asesorId         String
+  ubicacionId      String           @unique
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  asesor    Asesor    @relation(fields: [asesorId], references: [id])
+  ubicacion Ubicacion @relation(fields: [ubicacionId], references: [id])
+  imagenes  Imagen[]
+  mensajes  Mensaje[]
+}
+
+model Ubicacion {
+  id        String  @id @default(uuid())
+  direccion String
+  sector    String?
+  ciudad    String  @default("Guayaquil")
+  provincia String  @default("Guayas")
+  latitud   Float
+  longitud  Float
+
+  propiedad Propiedad?
+}
+
+model Imagen {
+  id          String @id @default(uuid())
+  url         String
+  publicId    String
+  orden       Int    @default(0)
+  propiedadId String
+
+  propiedad Propiedad @relation(fields: [propiedadId], references: [id])
+}
+
+model Mensaje {
+  id           String        @id @default(uuid())
+  nombre       String
+  email        String
+  telefono     String?
+  mensaje      String
+  tipo         TipoMensaje
+  leido        Boolean       @default(false)
+  archivado    Boolean       @default(false)
+  propiedadId  String?
+  asesorId     String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  propiedad Propiedad? @relation(fields: [propiedadId], references: [id])
+  asesor    Asesor     @relation(fields: [asesorId], references: [id])
+}
