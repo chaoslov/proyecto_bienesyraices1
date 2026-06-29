@@ -3,8 +3,10 @@ import { IPropiedadRepository } from '../../domain/ports/IPropiedadRepository'
 
 export class PropiedadRepository implements IPropiedadRepository {
   async findAll(filtros = {}) {
-    const { precioMin, precioMax, tipoPropiedad, tipoTransaccion, habitaciones, ubicacion,
-            asesorId, estado, busqueda, destacada, page = 1, limit = 20 } = filtros as any
+    const { precioMin, precioMax, tipoPropiedad, tipoTransaccion, habitaciones, banios, parqueos,
+      sector, ciudad, ubicacion, asesorId, estado, busqueda, destacada,
+      metrajeMin, metrajeMax, ordenarPor, ordenDireccion, page = 1, limit = 20 } = filtros as any
+
 
     const where: any = {}
 
@@ -16,9 +18,24 @@ export class PropiedadRepository implements IPropiedadRepository {
     if (tipoPropiedad) where.tipoPropiedad = tipoPropiedad
     if (tipoTransaccion) where.tipoTransaccion = tipoTransaccion
     if (habitaciones) where.habitaciones = habitaciones
+    if (banios) where.banios = banios
+    if (parqueos) where.parqueos = parqueos
     if (asesorId) where.asesorId = asesorId
     if (estado) where.estado = estado
     if (destacada) where.destacada = true
+
+    if (metrajeMin || metrajeMax) {
+      where.metrajeTotal = {}
+      if (metrajeMin) where.metrajeTotal.gte = metrajeMin
+      if (metrajeMax) where.metrajeTotal.lte = metrajeMax
+    }
+
+    if (sector || ciudad) {
+      where.ubicacion = {}
+      if (sector) where.ubicacion.sector = { contains: sector, mode: 'insensitive' }
+      if (ciudad) where.ubicacion.ciudad = { contains: ciudad, mode: 'insensitive' }
+    }
+
     if (busqueda) {
       where.OR = [
         { titulo: { contains: busqueda, mode: 'insensitive' } },
@@ -28,13 +45,20 @@ export class PropiedadRepository implements IPropiedadRepository {
 
     const skip = (page - 1) * limit
 
+    const orderBy: any = {}
+    if (ordenarPor) {
+      orderBy[ordenarPor] = ordenDireccion || 'desc'
+    } else {
+      orderBy.createdAt = 'desc'
+    }
+
     const [data, total] = await Promise.all([
       prisma.propiedad.findMany({
         where,
         skip,
         take: limit,
         include: { imagenes: { orderBy: { orden: 'asc' } }, ubicacion: true, asesor: { select: { id: true, nombre: true, telefono: true } } },
-        orderBy: { createdAt: 'desc' },
+        orderBy,
       }),
       prisma.propiedad.count({ where }),
     ])
