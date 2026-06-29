@@ -1,5 +1,3 @@
-import { Prisma } from '../../generated/prisma/client'
-
 export interface IPropiedadRepository {
   findAll(filtros?: {
     precioMin?: number

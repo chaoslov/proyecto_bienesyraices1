@@ -1,12 +1,18 @@
 import { Router } from 'express'
 import { AsesorController } from '../controllers/AsesorController'
+import { AsesorService } from '../../application/services/AsesorService'
+import { AsesorRepository } from '../repositories/AsesorRepository'
+
+const repository = new AsesorRepository()
+const service = new AsesorService(repository)
+const controller = new AsesorController(service)
 
 const router = Router()
 
-router.get('/asesores', AsesorController.listar)
-router.get('/asesores/:id', AsesorController.obtenerPorId)
-router.post('/asesores', AsesorController.crear)
-router.put('/asesores/:id', AsesorController.actualizar)
-router.delete('/asesores/:id', AsesorController.eliminar)
+router.get('/asesores', controller.listar)
+router.get('/asesores/:id', controller.obtenerPorId)
+router.post('/asesores', controller.crear)
+router.put('/asesores/:id', controller.actualizar)
+router.delete('/asesores/:id', controller.eliminar)
 
 export { router as asesorRouter }

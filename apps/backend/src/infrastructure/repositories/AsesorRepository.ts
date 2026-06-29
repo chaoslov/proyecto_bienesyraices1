@@ -1,6 +1,7 @@
 import prisma from '../database/prisma'
+import { IAsesorRepository } from '../../domain/ports/IAsesorRepository'
 
-export class AsesorRepository {
+export class AsesorRepository implements IAsesorRepository {
   async findAll() {
     return prisma.asesor.findMany({
       include: {
@@ -59,5 +60,3 @@ export class AsesorRepository {
     ])
   }
 }
-
-export const asesorRepository = new AsesorRepository()
