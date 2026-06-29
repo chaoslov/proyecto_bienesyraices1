@@ -7,6 +7,8 @@ import cors from 'cors'
 import prisma from './infrastructure/database/prisma'
 import { propiedadRouter } from './infrastructure/routes/propiedad.routes'
 import { asesorRouter } from './infrastructure/routes/asesor.routes'
+import { mensajeRouter } from './infrastructure/routes/mensaje.routes'
+import { imagenRouter } from './infrastructure/routes/imagen.routes'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -16,7 +18,8 @@ app.use(express.json())
 
 app.use('/api', propiedadRouter)
 app.use('/api', asesorRouter)
-
+app.use('/api', mensajeRouter)
+app.use('/api', imagenRouter)
 app.get('/api/health', async (_req: Request, res: Response) => {
   try {
     await prisma.$queryRaw`SELECT 1`

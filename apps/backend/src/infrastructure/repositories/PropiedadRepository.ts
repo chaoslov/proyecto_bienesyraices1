@@ -67,10 +67,11 @@ export class PropiedadRepository implements IPropiedadRepository {
   }
 
   async create(data: any) {
-    const { ubicacion, ...propiedadData } = data
+    const { ubicacion, asesorId, ...propiedadData } = data
     return prisma.propiedad.create({
       data: {
         ...propiedadData,
+        asesor: { connect: { id: asesorId } },
         ubicacion: { create: ubicacion },
       },
       include: { imagenes: true, ubicacion: true, asesor: { select: { id: true, nombre: true, telefono: true } } },
