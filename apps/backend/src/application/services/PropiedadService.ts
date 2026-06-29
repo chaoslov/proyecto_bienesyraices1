@@ -1,12 +1,14 @@
 import { IPropiedadRepository } from '../../domain/ports/IPropiedadRepository'
-import { createPropiedadSchema, updatePropiedadSchema } from '../validations/propiedad.validation'
+import { createPropiedadSchema, updatePropiedadSchema, filtrosPropiedadSchema } from '../validations/propiedad.validation'
 import { ZodError } from 'zod'
 
+
 export class PropiedadService {
-  constructor(private repository: IPropiedadRepository) {}
+  constructor(private repository: IPropiedadRepository) { }
 
   async listar(filtros: any) {
-    return this.repository.findAll(filtros)
+    const filtrosValidos = filtrosPropiedadSchema.parse(filtros)
+    return this.repository.findAll(filtrosValidos)
   }
 
   async listarDestacadas() {
