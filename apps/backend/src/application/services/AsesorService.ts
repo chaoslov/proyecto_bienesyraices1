@@ -1,36 +1,36 @@
-import { asesorRepository } from '../../infrastructure/repositories/AsesorRepository'
+import { IAsesorRepository } from '../../domain/ports/IAsesorRepository'
 import { createAsesorSchema, updateAsesorSchema } from '../validations/asesor.validation'
 import bcrypt from 'bcryptjs'
 
 export class AsesorService {
-  async listar() { return asesorRepository.findAll() }
+  constructor(private repository: IAsesorRepository) {}
+
+  async listar() { return this.repository.findAll() }
 
   async obtenerPorId(id: string) {
-    const asesor = await asesorRepository.findById(id)
+    const asesor = await this.repository.findById(id)
     if (!asesor) throw { status: 404, message: 'Asesor no encontrado' }
     return asesor
   }
 
   async crear(data: any) {
     const validData = createAsesorSchema.parse(data)
-    const existente = await asesorRepository.findByEmail(validData.email)
+    const existente = await this.repository.findByEmail(validData.email)
     if (existente) throw { status: 400, message: 'Email ya registrado' }
     const hashedPassword = await bcrypt.hash(validData.password, 10)
-    return asesorRepository.create({ ...validData, password: hashedPassword })
+    return this.repository.create({ ...validData, password: hashedPassword })
   }
 
   async actualizar(id: string, data: any) {
-    const exists = await asesorRepository.findById(id)
+    const exists = await this.repository.findById(id)
     if (!exists) throw { status: 404, message: 'Asesor no encontrado' }
     const validData = updateAsesorSchema.parse(data)
-    return asesorRepository.update(id, validData)
+    return this.repository.update(id, validData)
   }
 
   async eliminar(id: string) {
-    const exists = await asesorRepository.findById(id)
+    const exists = await this.repository.findById(id)
     if (!exists) throw { status: 404, message: 'Asesor no encontrado' }
-    await asesorRepository.delete(id)
+    await this.repository.delete(id)
   }
 }
-
-export const asesorService = new AsesorService()

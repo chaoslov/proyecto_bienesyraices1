@@ -1,18 +1,20 @@
-import { propiedadRepository } from '../../infrastructure/repositories/PropiedadRepository'
+import { IPropiedadRepository } from '../../domain/ports/IPropiedadRepository'
 import { createPropiedadSchema, updatePropiedadSchema } from '../validations/propiedad.validation'
 import { ZodError } from 'zod'
 
 export class PropiedadService {
+  constructor(private repository: IPropiedadRepository) {}
+
   async listar(filtros: any) {
-    return propiedadRepository.findAll(filtros)
+    return this.repository.findAll(filtros)
   }
 
   async listarDestacadas() {
-    return propiedadRepository.findDestacadas()
+    return this.repository.findDestacadas()
   }
 
   async obtenerPorId(id: string) {
-    const propiedad = await propiedadRepository.findById(id)
+    const propiedad = await this.repository.findById(id)
     if (!propiedad) throw { status: 404, message: 'Propiedad no encontrada' }
     return propiedad
   }
@@ -20,7 +22,7 @@ export class PropiedadService {
   async crear(data: any) {
     try {
       const validData = createPropiedadSchema.parse(data)
-      return propiedadRepository.create(validData)
+      return this.repository.create(validData)
     } catch (error) {
       if (error instanceof ZodError) {
         throw { status: 400, message: 'Datos inválidos', errors: error.issues }
@@ -30,12 +32,12 @@ export class PropiedadService {
   }
 
   async actualizar(id: string, data: any) {
-    const exists = await propiedadRepository.findById(id)
+    const exists = await this.repository.findById(id)
     if (!exists) throw { status: 404, message: 'Propiedad no encontrada' }
 
     try {
       const validData = updatePropiedadSchema.parse(data)
-      return propiedadRepository.update(id, validData)
+      return this.repository.update(id, validData)
     } catch (error) {
       if (error instanceof ZodError) {
         throw { status: 400, message: 'Datos inválidos', errors: error.issues }
@@ -45,16 +47,14 @@ export class PropiedadService {
   }
 
   async eliminar(id: string) {
-    const exists = await propiedadRepository.findById(id)
+    const exists = await this.repository.findById(id)
     if (!exists) throw { status: 404, message: 'Propiedad no encontrada' }
-    await propiedadRepository.delete(id)
+    await this.repository.delete(id)
   }
 
   async cambiarEstado(id: string, estado: string) {
-    const exists = await propiedadRepository.findById(id)
+    const exists = await this.repository.findById(id)
     if (!exists) throw { status: 404, message: 'Propiedad no encontrada' }
-    return propiedadRepository.update(id, { estado })
+    return this.repository.update(id, { estado })
   }
 }
-
-export const propiedadService = new PropiedadService()

@@ -1,6 +1,7 @@
 import prisma from '../database/prisma'
+import { IPropiedadRepository } from '../../domain/ports/IPropiedadRepository'
 
-export class PropiedadRepository {
+export class PropiedadRepository implements IPropiedadRepository {
   async findAll(filtros = {}) {
     const { precioMin, precioMax, tipoPropiedad, tipoTransaccion, habitaciones, ubicacion,
             asesorId, estado, busqueda, destacada, page = 1, limit = 20 } = filtros as any
@@ -96,5 +97,3 @@ export class PropiedadRepository {
     return prisma.propiedad.count({ where: { asesorId } })
   }
 }
-
-export const propiedadRepository = new PropiedadRepository()

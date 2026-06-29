@@ -1,38 +1,40 @@
 import { Request, Response } from 'express'
-import { propiedadService } from '../../application/services/PropiedadService'
+import { PropiedadService } from '../../application/services/PropiedadService'
 import { getId } from '../middlewares/validateId'
 
 export class PropiedadController {
-  static async listar(req: Request, res: Response) {
+  constructor(private service: PropiedadService) {}
+
+  listar = async (req: Request, res: Response) => {
     try {
-      const result = await propiedadService.listar(req.query)
+      const result = await this.service.listar(req.query)
       res.json(result)
     } catch (error: any) {
       res.status(error.status || 500).json({ message: error.message || 'Error interno' })
     }
   }
 
-  static async listarDestacadas(_req: Request, res: Response) {
+  listarDestacadas = async (_req: Request, res: Response) => {
     try {
-      const propiedades = await propiedadService.listarDestacadas()
+      const propiedades = await this.service.listarDestacadas()
       res.json(propiedades)
     } catch (error: any) {
       res.status(500).json({ message: 'Error al obtener destacadas' })
     }
   }
 
-  static async obtenerPorId(req: Request, res: Response) {
+  obtenerPorId = async (req: Request, res: Response) => {
     try {
-      const propiedad = await propiedadService.obtenerPorId(getId(req))
+      const propiedad = await this.service.obtenerPorId(getId(req))
       res.json(propiedad)
     } catch (error: any) {
       res.status(error.status || 500).json({ message: error.message || 'Error interno' })
     }
   }
 
-  static async crear(req: Request, res: Response) {
+  crear = async (req: Request, res: Response) => {
     try {
-      const propiedad = await propiedadService.crear(req.body)
+      const propiedad = await this.service.crear(req.body)
       res.status(201).json(propiedad)
     } catch (error: any) {
       if (error.errors) {
@@ -42,9 +44,9 @@ export class PropiedadController {
     }
   }
 
-  static async actualizar(req: Request, res: Response) {
+  actualizar = async (req: Request, res: Response) => {
     try {
-      const propiedad = await propiedadService.actualizar(getId(req), req.body)
+      const propiedad = await this.service.actualizar(getId(req), req.body)
       res.json(propiedad)
     } catch (error: any) {
       if (error.errors) {
@@ -54,18 +56,18 @@ export class PropiedadController {
     }
   }
 
-  static async eliminar(req: Request, res: Response) {
+  eliminar = async (req: Request, res: Response) => {
     try {
-      await propiedadService.eliminar(getId(req))
+      await this.service.eliminar(getId(req))
       res.status(204).send()
     } catch (error: any) {
       res.status(error.status || 500).json({ message: error.message || 'Error interno' })
     }
   }
 
-  static async cambiarEstado(req: Request, res: Response) {
+  cambiarEstado = async (req: Request, res: Response) => {
     try {
-      const propiedad = await propiedadService.cambiarEstado(getId(req), req.body.estado)
+      const propiedad = await this.service.cambiarEstado(getId(req), req.body.estado)
       res.json(propiedad)
     } catch (error: any) {
       res.status(error.status || 500).json({ message: error.message || 'Error interno' })
