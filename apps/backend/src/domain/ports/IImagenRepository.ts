@@ -1,7 +1,9 @@
+import { ImagenEntity, CreateImagenData } from '../entities/Imagen'
+
 export interface IImagenRepository {
-  findAllByPropiedadId(propiedadId: string): Promise<any[]>
-  findById(id: string): Promise<any | null>
-  create(data: { url: string; publicId: string; orden: number; propiedadId: string }): Promise<any>
-  createMany(data: { url: string; publicId: string; orden: number; propiedadId: string }[]): Promise<any>
+  findAllByPropiedadId(propiedadId: string): Promise<ImagenEntity[]>
+  findById(id: string): Promise<ImagenEntity | null>
+  create(data: CreateImagenData): Promise<ImagenEntity>
+  createMany(data: CreateImagenData[]): Promise<any>
   delete(id: string): Promise<void>
 }
