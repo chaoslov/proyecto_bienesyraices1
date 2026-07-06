@@ -31,7 +31,7 @@ export function useGroq() {
     const mensajesParaGroq = historial
       .filter((m) => !m.esCargando)
       .map((m) => ({
-        role: (m.rol === 'asistente' ? 'assistant' : 'user') as const,
+        role: (m.rol === 'asistente' ? 'assistant' : 'user') as 'assistant' | 'user',
         content: m.contenido,
       }))
 
