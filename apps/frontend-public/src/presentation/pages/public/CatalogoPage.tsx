@@ -1,10 +1,18 @@
-import { useEffect} from 'react'
+import { useEffect } from 'react'
 import { usePropiedadStore } from '@/application/store/propiedadStore'
 import { PropiedadCard } from '@/presentation/components/shared/PropiedadCard'
 import { Filtros } from '@/presentation/components/shared/Filtros'
+import { Paginacion } from '@/presentation/components/shared/Paginacion'
 
 export const CatalogoPage = () => {
-  const { propiedades, total, fetchPropiedades, loading, error, filtros } = usePropiedadStore()
+  const { propiedades, total, page, fetchPropiedades, loading, error, filtros } = usePropiedadStore()
+  const LIMIT = 12
+  const totalPages = Math.ceil(total / LIMIT)
+
+  const handlePageChange = (nuevaPagina: number) => {
+    fetchPropiedades(nuevaPagina)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   useEffect(() => {
     usePropiedadStore.getState().limpiarFiltros()
@@ -47,6 +55,14 @@ export const CatalogoPage = () => {
             <PropiedadCard key={prop.id} propiedad={prop} />
           ))}
         </div>
+      )}
+
+      {totalPages > 1 && (
+        <Paginacion
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       )}
     </div>
   )
