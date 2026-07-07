@@ -17,10 +17,14 @@ const MENSAJE_BIENVENIDA =
 export function useGroq() {
   const navigate = useNavigate()
   const abortRef = useRef<AbortController | null>(null)
+  const procesandoRef = useRef<boolean>(false)
 
   const enviarMensaje = useCallback(async (textoUsuario: string) => {
     const store = useChatbotStore.getState()
-    if (store.estado === 'procesando') return
+    
+    if (store.estado === 'procesando' || procesandoRef.current) return
+
+    procesandoRef.current = true
 
     store.setEstado('procesando')
     store.setEstaEscribiendo(true)
@@ -106,6 +110,7 @@ export function useGroq() {
     } finally {
       store.setEstaEscribiendo(false)
       abortRef.current = null
+      procesandoRef.current = false
     }
   }, [navigate])
 

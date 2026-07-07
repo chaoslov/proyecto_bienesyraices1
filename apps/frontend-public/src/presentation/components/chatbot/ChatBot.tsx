@@ -89,20 +89,6 @@ export const ChatBot = () => {
             {mensajes.map((msg) => (
               <ChatMensaje key={msg.id} mensaje={msg} />
             ))}
-            {estado === 'procesando' && (
-              <div className="flex gap-2">
-                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center">
-                  <Bot size={14} className="text-gray-600" />
-                </div>
-                <div className="bg-gray-100 rounded-2xl rounded-tl-sm px-3 py-2">
-                  <span className="flex gap-1 items-center h-4">
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:0ms]" />
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
 
           <ChatInput onEnviar={enviarMensaje} />
