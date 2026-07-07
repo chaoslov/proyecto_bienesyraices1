@@ -3,7 +3,7 @@ import { useAsesorStore } from '@/application/store/asesorStore'
 import { AsesorCard } from '@/presentation/components/shared/AsesorCard'
 
 export const AsesoresPage = () => {
-  const { asesores, fetchAsesores, loading } = useAsesorStore()
+  const { asesores, fetchAsesores, loading, error } = useAsesorStore()
 
   useEffect(() => {
     if (asesores.length === 0) {
@@ -22,6 +22,13 @@ export const AsesoresPage = () => {
   return (
     <div className="container-custom py-8">
       <h1 className="text-3xl font-bold text-center text-[#2C3E50] mb-8">Nuestros Asesores</h1>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+          {error}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
         {asesores.map((asesor) => (
           <AsesorCard key={asesor.id} asesor={asesor} />
