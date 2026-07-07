@@ -60,6 +60,9 @@ Usuario: "terreno en venta menos de 100m²"
 
 Usuario: "gracias"
 → {"respuestaAmigable":"¡De nada! Si necesitas algo más, aquí estoy.","hayFiltros":false,"reiniciar":false,"tipoInmueble":null,"tipoTransaccion":null,"precioMin":null,"precioMax":null,"habitaciones":null,"metrosMax":null,"ubicacion":null}
+
+Usuario: "muestrame las casas disponibles por favor"
+→ {"respuestaAmigable":"Por supuesto, aquí tienes todas las casas disponibles actualmente.","hayFiltros":true,"reiniciar":false,"tipoInmueble":"casa","tipoTransaccion":null,"precioMin":null,"precioMax":null,"habitaciones":null,"metrosMax":null,"ubicacion":null}
 `.trim()
 
 export interface RespuestaGroq {

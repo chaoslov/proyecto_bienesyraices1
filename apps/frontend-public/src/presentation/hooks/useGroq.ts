@@ -66,7 +66,9 @@ export function useGroq() {
 
       store.actualizarMensaje(idBurbuja, { contenido: respuesta.respuestaAmigable, esCargando: false })
 
-      if (respuesta.hayFiltros) {
+      const activarFiltrado = respuesta.hayFiltros || !!respuesta.tipoInmueble || !!respuesta.ubicacion
+      
+      if (activarFiltrado) {
         const filtros: Record<string, any> = {}
         if (respuesta.tipoInmueble) filtros.tipoInmueble = respuesta.tipoInmueble
         if (respuesta.tipoTransaccion) filtros.tipoTransaccion = respuesta.tipoTransaccion
@@ -74,10 +76,13 @@ export function useGroq() {
         if (respuesta.precioMax) filtros.precioMax = respuesta.precioMax
         if (respuesta.habitaciones) filtros.habitaciones = respuesta.habitaciones
         if (respuesta.ubicacion) filtros.ciudad = respuesta.ubicacion
+        
         usePropiedadStore.getState().setFiltros(filtros)
-        useChatbotStore.getState().setChatAbierto(false)
+        store.toggleChat()
         setTimeout(() => navigate('/propiedades'), 500)
       }
+
+      store.setEstado('listo')
 
       store.setEstado('listo')
     } catch (error) {
