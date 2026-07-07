@@ -6,7 +6,6 @@ import { PrincipalPage } from './presentation/pages/public/PrincipalPage'
 import { CatalogoPage } from './presentation/pages/public/CatalogoPage'
 import { DetallePage } from './presentation/pages/public/DetallePage'
 import { AsesoresPage } from './presentation/pages/public/AsesoresPage'
-import { PerfilAsesorPage } from './presentation/pages/public/PerfilAsesorPage'
 import { NotFoundPage } from './presentation/pages/shared/ErrorPage'
 import { LoginPage } from './presentation/pages/private/LoginPage'
 import { DashboardPage } from './presentation/pages/private/DashboardPage'
@@ -25,7 +24,6 @@ function App() {
         <Route path="propiedades" element={<CatalogoPage />} />
         <Route path="propiedad/:id" element={<DetallePage />} />
         <Route path="asesores" element={<AsesoresPage />} />
-        <Route path="asesores/:id" element={<PerfilAsesorPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
