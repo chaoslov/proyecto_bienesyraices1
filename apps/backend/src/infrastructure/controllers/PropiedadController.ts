@@ -61,6 +61,7 @@ export class PropiedadController {
       await this.service.eliminar(getId(req))
       res.status(204).send()
     } catch (error: any) {
+      console.error('Error al eliminar propiedad:', error)
       res.status(error.status || 500).json({ message: error.message || 'Error interno' })
     }
   }

@@ -51,4 +51,16 @@ export class AsesorController {
       res.status(error.status || 500).json({ message: error.message || 'Error interno' })
     }
   }
+
+  subirFoto = async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'Archivo de foto requerido' })
+      }
+      const asesor = await this.service.subirFoto(getId(req), req.file)
+      res.json(asesor)
+    } catch (error: any) {
+      res.status(error.status || 500).json({ message: error.message || 'Error al subir foto' })
+    }
+  }
 }

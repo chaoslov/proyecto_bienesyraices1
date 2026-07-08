@@ -1,6 +1,7 @@
 import { IAsesorRepository } from '../../domain/ports/IAsesorRepository'
 import { createAsesorSchema, updateAsesorSchema } from '../validations/asesor.validation'
 import bcrypt from 'bcryptjs'
+import { uploadToCloudinary } from '../../infrastructure/cloudinary/upload'
 
 export class AsesorService {
   constructor(private repository: IAsesorRepository) {}
@@ -32,5 +33,13 @@ export class AsesorService {
     const exists = await this.repository.findById(id)
     if (!exists) throw { status: 404, message: 'Asesor no encontrado' }
     await this.repository.delete(id)
+  }
+
+  async subirFoto(id: string, file: Express.Multer.File) {
+    const exists = await this.repository.findById(id)
+    if (!exists) throw { status: 404, message: 'Asesor no encontrado' }
+
+    const result = await uploadToCloudinary(file, 'alpha-inmobiliaria/asesores')
+    return this.repository.update(id, { foto: result.secure_url })
   }
 }

@@ -1,5 +1,6 @@
 import prisma from '../database/prisma'
 import { IPropiedadRepository } from '../../domain/ports/IPropiedadRepository'
+import { CreateImagenData } from '../../domain/entities/Imagen'
 
 export class PropiedadRepository implements IPropiedadRepository {
   async findAll(filtros = {}) {
@@ -20,8 +21,11 @@ export class PropiedadRepository implements IPropiedadRepository {
     if (habitaciones) where.habitaciones = habitaciones
     if (banios) where.banios = banios
     if (parqueos) where.parqueos = parqueos
-    if (asesorId) where.asesorId = asesorId
-    if (estado) where.estado = estado
+    if (asesorId) {
+      where.asesorId = asesorId
+    } else {
+      where.estado = estado || 'activa'
+    }
     if (destacada) where.destacada = true
 
     if (metrajeMin || metrajeMax) {
@@ -91,24 +95,26 @@ export class PropiedadRepository implements IPropiedadRepository {
   }
 
   async create(data: any) {
-    const { ubicacion, asesorId, ...propiedadData } = data
+    const { ubicacion, asesorId, imagenes, ...propiedadData } = data
     return prisma.propiedad.create({
       data: {
         ...propiedadData,
         asesor: { connect: { id: asesorId } },
         ubicacion: { create: ubicacion },
+        ...(imagenes ? { imagenes: { create: imagenes as CreateImagenData[] } } : {}),
       },
       include: { imagenes: true, ubicacion: true, asesor: { select: { id: true, nombre: true, telefono: true } } },
     })
   }
 
   async update(id: string, data: any) {
-    const { ubicacion, ...propiedadData } = data
+    const { ubicacion, imagenes, ...propiedadData } = data
     return prisma.propiedad.update({
       where: { id },
       data: {
         ...propiedadData,
         ...(ubicacion ? { ubicacion: { update: ubicacion } } : {}),
+        ...(imagenes ? { imagenes: { deleteMany: {}, create: imagenes as CreateImagenData[] } } : {}),
       },
       include: { imagenes: true, ubicacion: true, asesor: { select: { id: true, nombre: true, telefono: true } } },
     })
