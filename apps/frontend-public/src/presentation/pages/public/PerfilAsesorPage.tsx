@@ -191,18 +191,12 @@ export const PerfilAsesorPage = () => {
 
       <section className="mt-10 bg-white rounded-xl shadow-sm p-6 md:p-8 border border-gray-100">
         <h2 className="text-xl font-bold text-[#2C3E50] mb-4">Acerca de {asesor.nombre}</h2>
-        <div className="text-gray-600 leading-relaxed space-y-3">
-          <p>
-            {asesor.nombre} es un asesor inmobiliario con {asesor.experiencia} anos de experiencia
-            en el mercado de {asesor.especialidad || 'bienes raices'}. Su formacion y trayectoria
-            le permiten ofrecer una vision integral a cada cliente, acompanandolo desde la busqueda
-            hasta el cierre exitoso de la operacion.
-          </p>
-          <p>
-            Especializado en {asesor.especialidad || 'el sector inmobiliario'}, ha construido
-            una solida reputacion basada en la transparencia, el profesionalismo y el compromiso
-            con las necesidades de cada comprador o vendedor.
-          </p>
+        <div className="text-gray-600 leading-relaxed">
+          {asesor.descripcion ? (
+            <p>{asesor.descripcion}</p>
+          ) : (
+            <p className="text-gray-400 italic">Este asesor aún no ha añadido una descripción.</p>
+          )}
         </div>
       </section>
 
