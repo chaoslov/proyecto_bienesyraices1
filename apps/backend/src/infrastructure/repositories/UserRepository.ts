@@ -5,14 +5,14 @@ export class UserRepository implements IUserRepository {
   async findByEmail(email: string) {
     return prisma.user.findUnique({
       where: { email },
-      include: { asesor: true },
+      include: { asesor: { include: { _count: { select: { propiedades: true } } } } },
     })
   }
 
   async findById(id: string) {
     return prisma.user.findUnique({
       where: { id },
-      include: { asesor: true },
+      include: { asesor: { include: { _count: { select: { propiedades: true } } } } },
     })
   }
 }

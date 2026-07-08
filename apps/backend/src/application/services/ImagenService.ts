@@ -1,11 +1,11 @@
 import { IImagenRepository } from '../../domain/ports/IImagenRepository'
-import cloudinary from '../../infrastructure/cloudinary/config'
+import { uploadToCloudinary, destroyFromCloudinary } from '../../infrastructure/cloudinary/upload'
 
 export class ImagenService {
   constructor(private repository: IImagenRepository) {}
 
   async subir(propiedadId: string, file: Express.Multer.File) {
-    const result = await this.subirACloudinary(file)
+    const result = await uploadToCloudinary(file)
     const ultima = await this.repository.findAllByPropiedadId(propiedadId)
     const orden = ultima.length
 
@@ -18,7 +18,7 @@ export class ImagenService {
   }
 
   async subirMultiples(propiedadId: string, files: Express.Multer.File[]) {
-    const results = await Promise.all(files.map(f => this.subirACloudinary(f)))
+    const results = await Promise.all(files.map(f => uploadToCloudinary(f)))
     const existentes = await this.repository.findAllByPropiedadId(propiedadId)
 
     const data = results.map((r, i) => ({
@@ -36,20 +36,15 @@ export class ImagenService {
     const imagen = await this.repository.findById(id)
     if (!imagen) throw { status: 404, message: 'Imagen no encontrada' }
 
-    await cloudinary.uploader.destroy(imagen.publicId)
+    await destroyFromCloudinary(imagen.publicId)
     await this.repository.delete(id)
   }
 
-  private async subirACloudinary(file: Express.Multer.File) {
-    return new Promise<any>((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: 'alpha-inmobiliaria' },
-        (error, result) => {
-          if (error) reject(error)
-          else resolve(result)
-        },
-      )
-      stream.end(file.buffer)
-    })
+  async eliminarPorPropiedadId(propiedadId: string) {
+    const imagenes = await this.repository.findAllByPropiedadId(propiedadId)
+    if (imagenes.length === 0) return
+
+    await Promise.all(imagenes.map(img => destroyFromCloudinary(img.publicId)))
+    await Promise.all(imagenes.map(img => this.repository.delete(img.id)))
   }
 }

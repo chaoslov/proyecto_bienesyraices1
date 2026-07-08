@@ -1,10 +1,14 @@
 import { IPropiedadRepository } from '../../domain/ports/IPropiedadRepository'
 import { createPropiedadSchema, updatePropiedadSchema, filtrosPropiedadSchema } from '../validations/propiedad.validation'
 import { ZodError } from 'zod'
+import { ImagenService } from './ImagenService'
 
 
 export class PropiedadService {
-  constructor(private repository: IPropiedadRepository) { }
+  constructor(
+    private repository: IPropiedadRepository,
+    private imagenService: ImagenService,
+  ) { }
 
   async listar(filtros: any) {
     const filtrosValidos = filtrosPropiedadSchema.parse(filtros)
@@ -51,6 +55,8 @@ export class PropiedadService {
   async eliminar(id: string) {
     const exists = await this.repository.findById(id)
     if (!exists) throw { status: 404, message: 'Propiedad no encontrada' }
+
+    await this.imagenService.eliminarPorPropiedadId(id)
     await this.repository.delete(id)
   }
 
