@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/application/store/authStore'
 
 export const PrivateRoute = () => {
   const { token, user, checkAuth } = useAuthStore()
+  const location = useLocation()
   const [verificando, setVerificando] = useState(!!token && !user)
 
   useEffect(() => {
@@ -15,12 +16,12 @@ export const PrivateRoute = () => {
   }, [token, user, checkAuth])
 
   if (!token) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login" state={{ from: location }} replace />
   }
 
   if (verificando) {
     return (
-      <div className="flex items-center justify-center py-20">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="animate-spin h-8 w-8 border-4 border-[#2C3E50] border-t-transparent rounded-full" />
       </div>
     )
@@ -28,7 +29,7 @@ export const PrivateRoute = () => {
 
   if (!user?.asesor) {
     return (
-      <div className="flex items-center justify-center py-20">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-md text-center">
           <h2 className="text-xl font-bold text-gray-800 mb-2">Acceso restringido</h2>
           <p className="text-gray-600">Solo los asesores pueden acceder al panel.</p>

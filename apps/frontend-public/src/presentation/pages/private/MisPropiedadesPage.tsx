@@ -3,16 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/application/store/authStore'
 import { PropiedadApi } from '@/infrastructure/api/repositories/PropiedadApiRepository'
 import { Propiedad } from '@/domain/entities/Propiedad'
-import { Plus, Edit, Trash2, Eye, EyeOff, Building2 } from 'lucide-react'
-import { ModalConfirmacion } from '@/presentation/components/shared/ModalConfirmacion'
+import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react'
 
 export const MisPropiedadesPage = () => {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const [propiedades, setPropiedades] = useState<Propiedad[]>([])
   const [loading, setLoading] = useState(true)
-  const [eliminando, setEliminando] = useState(false)
-  const [eliminarId, setEliminarId] = useState<string | null>(null)
 
   const cargar = () => {
     const asesorId = user?.asesor?.id
@@ -32,18 +29,12 @@ export const MisPropiedadesPage = () => {
     } catch { alert('Error al cambiar el estado') }
   }
 
-  const confirmarEliminar = async () => {
-    if (!eliminarId) return
-    setEliminando(true)
+  const eliminarPropiedad = async (id: string) => {
+    if (!confirm('¿Eliminar esta propiedad?')) return
     try {
-      await PropiedadApi.eliminar(eliminarId)
-      setEliminarId(null)
+      await PropiedadApi.eliminar(id)
       cargar()
-    } catch (err: any) {
-      alert(err?.message || 'Error al eliminar la propiedad. Verifica que el servidor esté funcionando.')
-    } finally {
-      setEliminando(false)
-    }
+    } catch { alert('Error al eliminar') }
   }
 
   if (loading) {
@@ -62,8 +53,9 @@ export const MisPropiedadesPage = () => {
           <p className="text-sm text-gray-500 mt-1">{propiedades.length} propiedades registradas</p>
         </div>
         <button
-          onClick={() => navigate('/panel/propiedades/nueva')}
-          className="flex items-center gap-2 bg-[#2C3E50] text-white px-4 py-2 rounded-lg hover:bg-[#1a2a3a] transition text-sm font-medium"
+          disabled
+          className="flex items-center gap-2 bg-gray-300 text-gray-500 px-4 py-2 rounded-lg cursor-not-allowed text-sm font-medium"
+          title="Deshabilitado temporalmente"
         >
           <Plus className="w-4 h-4" />
           Agregar Propiedad
@@ -75,8 +67,8 @@ export const MisPropiedadesPage = () => {
           <Building2 className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500">No tienes propiedades registradas</p>
           <button
-            onClick={() => navigate('/panel/propiedades/nueva')}
-            className="mt-4 bg-[#2C3E50] text-white px-4 py-2 rounded-lg hover:bg-[#1a2a3a] transition text-sm"
+            disabled
+            className="mt-4 bg-gray-300 text-gray-500 px-4 py-2 rounded-lg cursor-not-allowed text-sm"
           >
             Crear tu primera propiedad
           </button>
@@ -118,13 +110,13 @@ export const MisPropiedadesPage = () => {
                     className={`flex items-center gap-1 text-sm font-medium ${
                       prop.publicada
                         ? 'text-green-600 hover:text-green-700'
-                        : 'text-red-600 hover:text-red-700'
+                        : 'text-gray-400 hover:text-gray-500'
                     }`}
                   >
                     {prop.publicada ? (
-                      <><Eye className="w-4 h-4" /> Disponible</>
+                      <><Eye className="w-4 h-4" /> Publicado</>
                     ) : (
-                      <><EyeOff className="w-4 h-4" /> No disponible</>
+                      <><EyeOff className="w-4 h-4" /> No publicado</>
                     )}
                   </button>
 
@@ -137,7 +129,7 @@ export const MisPropiedadesPage = () => {
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => setEliminarId(prop.id)}
+                      onClick={() => eliminarPropiedad(prop.id)}
                       className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       title="Eliminar"
                     >
@@ -150,17 +142,8 @@ export const MisPropiedadesPage = () => {
           ))}
         </div>
       )}
-
-      <ModalConfirmacion
-        abierto={!!eliminarId}
-        titulo="Eliminar propiedad"
-        mensaje="¿Estás seguro de eliminar esta propiedad? Esta acción no se puede deshacer."
-        onConfirmar={confirmarEliminar}
-        onCancelar={() => setEliminarId(null)}
-        confirmando={eliminando}
-        textoConfirmar="Eliminar"
-        textoCancelar="Cancelar"
-      />
     </div>
   )
 }
+
+function Building2(props: any) { return <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>}

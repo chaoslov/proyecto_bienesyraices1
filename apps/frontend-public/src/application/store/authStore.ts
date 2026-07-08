@@ -10,10 +10,6 @@ export interface User {
     nombre: string
     telefono: string
     foto?: string
-    especialidad?: string
-    descripcion?: string
-    añosExperiencia?: number
-    _count?: { propiedades: number }
   } | null
 }
 
