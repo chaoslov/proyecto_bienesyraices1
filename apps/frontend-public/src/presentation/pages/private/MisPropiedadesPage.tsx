@@ -15,11 +15,10 @@ export const MisPropiedadesPage = () => {
   const [eliminarId, setEliminarId] = useState<string | null>(null)
 
   const cargar = () => {
-    const asesorId = user?.asesor?.id
-    if (!asesorId) return
     setLoading(true)
-    PropiedadApi.listar({ asesorId }, 1, 100)
+    PropiedadApi.listarMias(1, 100)
       .then((r) => setPropiedades(r.data))
+      .catch(() => setPropiedades([]))
       .finally(() => setLoading(false))
   }
 

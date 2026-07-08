@@ -11,13 +11,11 @@ export const MensajesPage = () => {
   const [loading, setLoading] = useState(true)
   const [filtro, setFiltro] = useState<Filtro>('todos')
 
-  const asesorId = user?.asesor?.id
-
   const cargar = () => {
-    if (!asesorId) return
     setLoading(true)
-    MensajeApi.listarPorAsesor(asesorId, { archivado: false })
+    MensajeApi.listarMios({ archivado: false })
       .then(setMensajes)
+      .catch(() => setMensajes([]))
       .finally(() => setLoading(false))
   }
 

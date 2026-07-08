@@ -25,6 +25,23 @@ export const PropiedadApi = {
     }
   },
 
+  async listarMias(page = 1, limit = 12, filtros?: Record<string, any>): Promise<PaginatedResult> {
+    const params: Record<string, string | number | undefined> = {
+      page,
+      limit,
+      ...Object.fromEntries(
+        Object.entries(filtros || {}).filter(([_, v]) => v !== undefined && v !== '')
+      ),
+    }
+    const res = await api.get<{ data: any[]; total: number; page: number; limit: number }>('/propiedades/mias', params)
+    return {
+      data: mapPropiedadesLista(res.data),
+      total: res.total,
+      page: res.page,
+      limit: res.limit,
+    }
+  },
+
   async destacadas(limit = 6): Promise<Propiedad[]> {
     const res = await api.get<any[]>('/propiedades/destacadas', { limit })
     return mapPropiedadesLista(res)
@@ -51,5 +68,13 @@ export const PropiedadApi = {
 
   async eliminar(id: string): Promise<void> {
     return api.delete<void>(`/propiedades/${id}`)
+  },
+
+  async obtenerRaw(id: string): Promise<any> {
+    return api.get<any>(`/propiedades/${id}`)
+  },
+
+  async eliminarImagen(id: string): Promise<void> {
+    await api.delete<void>(`/imagenes/${id}`)
   },
 }
