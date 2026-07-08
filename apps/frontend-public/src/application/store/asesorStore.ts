@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { Asesor } from '@/domain/entities/Asesor'
 import { AsesorApi } from '@/infrastructure/api/repositories/AsesorApiRepository'
+import { asesoresMock } from '@/infrastructure/mocks/asesoresMock'
 
 interface AsesorState {
   asesores: Asesor[]

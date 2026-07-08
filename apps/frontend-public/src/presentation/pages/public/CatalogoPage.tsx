@@ -1,11 +1,13 @@
 import { useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { usePropiedadStore } from '@/application/store/propiedadStore'
 import { PropiedadCard } from '@/presentation/components/shared/PropiedadCard'
 import { Filtros } from '@/presentation/components/shared/Filtros'
 import { Paginacion } from '@/presentation/components/shared/Paginacion'
 
 export const CatalogoPage = () => {
-  const { propiedades, total, page, fetchPropiedades, loading, error, filtros } = usePropiedadStore()
+  const { propiedades, total, page, fetchPropiedades, loading, error, filtros, setFiltros } = usePropiedadStore()
+  const [searchParams] = useSearchParams()
   const LIMIT = 12
   const totalPages = Math.ceil(total / LIMIT)
 
@@ -17,6 +19,13 @@ export const CatalogoPage = () => {
   useEffect(() => {
     usePropiedadStore.getState().limpiarFiltros()
   }, [])
+
+  useEffect(() => {
+    const tipo = searchParams.get('tipo')
+    if (tipo) {
+      setFiltros({ tipoTransaccion: tipo })
+    }
+  }, [searchParams, setFiltros])
 
   useEffect(() => {
     const debounce = setTimeout(() => {
