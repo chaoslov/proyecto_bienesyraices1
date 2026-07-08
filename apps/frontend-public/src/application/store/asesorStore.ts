@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { Asesor } from '@/domain/entities/Asesor'
 import { AsesorApi } from '@/infrastructure/api/repositories/AsesorApiRepository'
+import { asesoresMock } from '@/infrastructure/mocks/asesoresMock'
 
 interface AsesorState {
   asesores: Asesor[]
@@ -27,7 +28,7 @@ export const useAsesorStore = create<AsesorState>((set) => ({
       const asesores = await AsesorApi.listar()
       set({ asesores, loading: false })
     } catch {
-      set({ asesores: [], loading: false, error: 'No se pudieron cargar los asesores. Intenta de nuevo más tarde.' })
+      set({ asesores: asesoresMock, loading: false })
     }
   },
 }))

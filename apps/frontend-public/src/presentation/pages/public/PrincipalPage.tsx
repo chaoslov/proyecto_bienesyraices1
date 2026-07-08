@@ -84,7 +84,10 @@ export const PrincipalPage = () => {
             Nuestros Servicios
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="group bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center border border-gray-100">
+            <div
+              className="group bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center border border-gray-100 cursor-pointer"
+              onClick={() => navigate('/propiedades?tipo=venta')}
+            >
               <div className="flex justify-center mb-4">
                 <div className="w-14 h-14 bg-[#2C3E50]/10 rounded-full flex items-center justify-center text-[#2C3E50] group-hover:bg-[#2C3E50] group-hover:text-white transition-colors duration-300">
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,7 +101,10 @@ export const PrincipalPage = () => {
               </p>
             </div>
 
-            <div className="group bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center border border-gray-100">
+            <div
+              className="group bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center border border-gray-100 cursor-pointer"
+              onClick={() => navigate('/servicios/venta')}
+            >
               <div className="flex justify-center mb-4">
                 <div className="w-14 h-14 bg-[#2C3E50]/10 rounded-full flex items-center justify-center text-[#2C3E50] group-hover:bg-[#2C3E50] group-hover:text-white transition-colors duration-300">
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,7 +118,10 @@ export const PrincipalPage = () => {
               </p>
             </div>
 
-            <div className="group bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center border border-gray-100">
+            <div
+              className="group bg-gray-50 p-8 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center border border-gray-100 cursor-pointer"
+              onClick={() => navigate('/propiedades?tipo=alquiler')}
+            >
               <div className="flex justify-center mb-4">
                 <div className="w-14 h-14 bg-[#2C3E50]/10 rounded-full flex items-center justify-center text-[#2C3E50] group-hover:bg-[#2C3E50] group-hover:text-white transition-colors duration-300">
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
