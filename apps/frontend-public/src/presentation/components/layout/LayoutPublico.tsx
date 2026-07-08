@@ -2,7 +2,6 @@ import { Outlet } from 'react-router-dom'
 import { Navbar } from './Navbar'
 import { Footer } from './Footer'
 import { ChatBot } from '@/presentation/components/chatbot/ChatBot'
-import { AsesorSidebar } from './AsesorSidebar'
 
 export const LayoutPublico = () => {
   return (
@@ -13,7 +12,6 @@ export const LayoutPublico = () => {
       </main>
       <Footer />
       <ChatBot />
-      <AsesorSidebar />
     </div>
   )
 }

@@ -1,10 +1,11 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useUIStore } from '@/application/store/uiStore'
 import { useAuthStore } from '@/application/store/authStore'
 
 export const Navbar = () => {
-  const { sidebarAbierto, toggleSidebar, togglePanel } = useUIStore()
-  const { token, user } = useAuthStore()
+  const { sidebarAbierto, toggleSidebar } = useUIStore()
+  const { token, user, logout } = useAuthStore()
+  const navigate = useNavigate()
 
   return (
     <nav className="bg-[#2C3E50] shadow-md sticky top-0 z-40">
@@ -23,17 +24,19 @@ export const Navbar = () => {
           <Link to="/asesores" className="text-white/80 hover:text-white transition">
             Asesores
           </Link>
-          {token && (
-            <button
-              onClick={togglePanel}
-              className="w-9 h-9 rounded-full bg-[#C47B4A] flex items-center justify-center text-white text-sm font-bold hover:bg-[#b06a3d] transition flex-shrink-0 overflow-hidden"
-            >
-              {user?.asesor?.foto ? (
-                <img src={user.asesor.foto} alt="" className="w-full h-full object-cover" />
-              ) : (
-                user?.asesor?.nombre?.charAt(0) || 'A'
-              )}
-            </button>
+          {token && user ? (
+            <div className="flex items-center gap-3">
+              <Link to="/panel" className="bg-[#C47B4A] text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-[#b06a3d] transition">
+                Panel
+              </Link>
+              <button onClick={() => { logout(); navigate('/') }} className="text-white/70 hover:text-white text-sm">
+                Salir
+              </button>
+            </div>
+          ) : (
+            <Link to="/login" className="text-white hover:underline">
+              Iniciar Sesión
+            </Link>
           )}
         </div>
 
@@ -76,37 +79,19 @@ export const Navbar = () => {
               Asesores
             </Link>
             <hr />
-            {token && (
+            {token && user ? (
               <>
-                <div className="flex items-center gap-3 px-2 py-2 bg-gray-50 rounded-lg">
-                  <div className="w-8 h-8 rounded-full bg-[#C47B4A] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 overflow-hidden">
-                    {user?.asesor?.foto ? (
-                      <img src={user.asesor.foto} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      user?.asesor?.nombre?.charAt(0) || 'A'
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">{user?.asesor?.nombre || 'Asesor'}</p>
-                    <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-                  </div>
-                </div>
                 <Link to="/panel" className="text-[#C47B4A] font-medium" onClick={toggleSidebar}>
-                  Dashboard
+                  Panel
                 </Link>
-                <Link to="/panel/propiedades" className="text-[#C47B4A] font-medium" onClick={toggleSidebar}>
-                  Mis Propiedades
-                </Link>
-                <Link to="/panel/mensajes" className="text-[#C47B4A] font-medium" onClick={toggleSidebar}>
-                  Mensajes
-                </Link>
-                <Link to="/panel/perfil" className="text-[#C47B4A] font-medium" onClick={toggleSidebar}>
-                  Mi Perfil
-                </Link>
-                <button onClick={() => { useAuthStore.getState().logout(); toggleSidebar() }} className="text-red-500 text-sm text-left">
+                <button onClick={() => { logout(); navigate('/'); toggleSidebar() }} className="text-red-500 text-sm text-left">
                   Cerrar Sesión
                 </button>
               </>
+            ) : (
+              <Link to="/login" className="text-[#C47B4A] hover:underline" onClick={toggleSidebar}>
+                Iniciar Sesión
+              </Link>
             )}
           </div>
         </div>
