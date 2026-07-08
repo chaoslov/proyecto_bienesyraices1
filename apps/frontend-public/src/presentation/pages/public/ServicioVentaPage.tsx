@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { Button } from '@/presentation/components/ui/Botones'
 
 export const ServicioVentaPage = () => {
-  const [form, setForm] = useState({ nombre: '', email: '', telefono: '', direccion: '', mensaje: '' })
+  const [form, setForm] = useState({
+    nombre: '', apellido: '', email: '', telefono: '', ciudad: '', tipoPropiedad: '',
+  })
   const [enviado, setEnviado] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -12,116 +14,146 @@ export const ServicioVentaPage = () => {
 
   return (
     <div className="container-custom py-8">
-      <section className="relative h-[300px] md:h-[400px] rounded-xl overflow-hidden mb-10">
-        <img
-          src="https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=1200&h=600&fit=crop"
-          alt="Vende tu propiedad"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#2C3E50]/80 to-transparent flex items-center">
-          <div className="text-white px-8 md:px-12">
-            <h1 className="text-3xl md:text-5xl font-bold mb-4">Vende tu Propiedad</h1>
-            <p className="text-lg md:text-xl max-w-xl text-white/80">
-              Publica tu propiedad y conecta con miles de compradores interesados.
-            </p>
-          </div>
-        </div>
+      <section className="text-center py-12 md:py-20">
+        <h1 className="text-3xl md:text-5xl font-bold text-[#2C3E50] mb-4">
+          Vende tu Propiedad con Nosotros
+        </h1>
+        <p className="text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed mb-8">
+          Confia la venta de tu inmueble a profesionales. Maximiza tus ganancias y vende en tiempo
+          record con nuestra estrategia de marketing inmobiliario.
+        </p>
+        <a
+          href="#formulario-venta"
+          className="inline-block bg-[#C47B4A] hover:bg-[#A8663A] text-white font-bold px-8 py-3.5 rounded-lg transition-colors text-lg shadow-md"
+        >
+          ¡Quiero vender mi propiedad!
+        </a>
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <div>
-          <h2 className="text-2xl font-bold text-[#2C3E50] mb-6">¿Por que vender con nosotros?</h2>
-          <div className="space-y-6">
-            {[
-              { titulo: 'Expertos Locales', desc: 'Conocemos el mercado inmobiliario de Guayaquil y sus alrededores como nadie.' },
-              { titulo: 'Maxima Exposicion', desc: 'Tu propiedad llegara a miles de compradores potenciales a traves de nuestra plataforma y redes sociales.' },
-              { titulo: 'Asesoria Personalizada', desc: 'Te asignamos un asesor dedicado que te acompanara en todo el proceso de venta.' },
-              { titulo: 'Sin Complicaciones', desc: 'Nos encargamos de las visitas, negociaciones y tramites para que tu solo recibas la mejor oferta.' },
-            ].map((item) => (
-              <div key={item.titulo} className="flex gap-4">
-                <div className="w-12 h-12 bg-[#C47B4A]/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                  <svg className="w-6 h-6 text-[#C47B4A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
+      <section id="formulario-venta" className="scroll-mt-20">
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-5">
+            <div className="lg:col-span-3 p-8 md:p-10">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#2C3E50] mb-2">
+                Vende tu propiedad
+              </h2>
+              <p className="text-gray-500 mb-8">
+                Llena el formulario y un asesor se pondra en contacto contigo para continuar con el proceso.
+              </p>
+
+              {enviado ? (
+                <div className="bg-green-50 border border-green-200 text-green-700 px-6 py-8 rounded-xl text-center">
+                  <p className="text-lg font-medium">Solicitud enviada con exito</p>
+                  <p className="text-sm mt-2">Un asesor se comunicara contigo en las proximas 24 horas.</p>
+                  <Button variant="outline" className="mt-4" onClick={() => setEnviado(false)}>
+                    Enviar otra solicitud
+                  </Button>
                 </div>
-                <div>
-                  <h3 className="font-bold text-[#2C3E50]">{item.titulo}</h3>
-                  <p className="text-gray-600 text-sm mt-0.5">{item.desc}</p>
-                </div>
-              </div>
-            ))}
+              ) : (
+                <form className="space-y-5" onSubmit={handleSubmit}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Nombre</label>
+                      <input
+                        type="text"
+                        placeholder="Nombre"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C47B4A] focus:border-transparent transition"
+                        value={form.nombre}
+                        onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Apellido</label>
+                      <input
+                        type="text"
+                        placeholder="Apellido"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C47B4A] focus:border-transparent transition"
+                        value={form.apellido}
+                        onChange={(e) => setForm({ ...form, apellido: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+                    <input
+                      type="email"
+                      placeholder="E-mail"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C47B4A] focus:border-transparent transition"
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Telefono</label>
+                    <div className="flex gap-2">
+                      <select
+                        className="px-3 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#C47B4A] focus:border-transparent transition w-[130px] flex-shrink-0"
+                        defaultValue="+593"
+                      >
+                        <option value="+593">🇪🇨 +593</option>
+                      </select>
+                      <input
+                        type="tel"
+                        placeholder="Telefono de contacto"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C47B4A] focus:border-transparent transition"
+                        value={form.telefono}
+                        onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Ciudad</label>
+                    <input
+                      type="text"
+                      placeholder="Ciudad de donde nos contacta"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C47B4A] focus:border-transparent transition"
+                      value={form.ciudad}
+                      onChange={(e) => setForm({ ...form, ciudad: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Tipo de propiedad</label>
+                    <select
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#C47B4A] focus:border-transparent transition"
+                      value={form.tipoPropiedad}
+                      onChange={(e) => setForm({ ...form, tipoPropiedad: e.target.value })}
+                      required
+                    >
+                      <option value="">Seleccione un tipo</option>
+                      <option value="departamento">Departamento</option>
+                      <option value="casa">Casa</option>
+                      <option value="terreno">Terreno</option>
+                    </select>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-[#C47B4A] hover:bg-[#A8663A] text-white font-bold py-3.5 rounded-lg transition-colors text-lg"
+                  >
+                    Enviar
+                  </button>
+                </form>
+              )}
+            </div>
+
+            <div className="lg:col-span-2 bg-[#2C3E50] min-h-[300px] lg:min-h-full flex items-center justify-center">
+              <img
+                src="https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?w=800&h=1000&fit=crop"
+                alt="Asesoria Inmobiliaria"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
-
-        <div className="bg-gray-50 p-8 rounded-xl shadow-md">
-          <h2 className="text-2xl font-bold text-[#2C3E50] mb-6">Solicita una valoracion</h2>
-
-          {enviado ? (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-6 rounded-lg text-center">
-              <p className="text-lg font-medium">Solicitud enviada con exito</p>
-              <p className="text-sm mt-2">Un asesor se comunicara contigo en las proximas 24 horas.</p>
-              <Button variant="outline" className="mt-4" onClick={() => setEnviado(false)}>
-                Enviar otra solicitud
-              </Button>
-            </div>
-          ) : (
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <input
-                type="text"
-                placeholder="Tu nombre completo"
-                className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C47B4A]"
-                value={form.nombre}
-                onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-                required
-              />
-              <input
-                type="email"
-                placeholder="Tu correo electronico"
-                className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C47B4A]"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                required
-              />
-              <input
-                type="tel"
-                placeholder="Tu telefono"
-                className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C47B4A]"
-                value={form.telefono}
-                onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Direccion de la propiedad"
-                className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C47B4A]"
-                value={form.direccion}
-                onChange={(e) => setForm({ ...form, direccion: e.target.value })}
-                required
-              />
-              <textarea
-                placeholder="Cuentanos mas sobre tu propiedad (opcional)"
-                rows={3}
-                className="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C47B4A]"
-                value={form.mensaje}
-                onChange={(e) => setForm({ ...form, mensaje: e.target.value })}
-              />
-              <Button variant="primary" className="w-full py-3">
-                Enviar solicitud
-              </Button>
-            </form>
-          )}
-        </div>
-      </div>
-
-      <section className="mt-16 bg-[#F5F0EB] rounded-xl p-8 md:p-10 text-center">
-        <h2 className="text-2xl font-bold text-[#2C3E50] mb-4">¿Listo para vender?</h2>
-        <p className="text-gray-600 max-w-2xl mx-auto mb-6">
-          Completa el formulario y uno de nuestros asesores especializados se pondra en contacto
-          contigo para ofrecerte una valoracion gratuita y personalizada de tu propiedad.
-        </p>
-        <Button variant="primary" size="md" onClick={() => window.scrollTo({ top: 400, behavior: 'smooth' })}>
-          Solicitar Valoracion
-        </Button>
       </section>
     </div>
   )
