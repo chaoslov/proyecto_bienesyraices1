@@ -44,7 +44,6 @@ export const NuevaPropiedadPage = () => {
         areaTotal: form.areaTotal,
         metrajeConstruido: form.metrajeConstruido,
         destacada: form.destacada,
-        asesorId: user?.asesor?.id,
         imagenes: undefined,
         ubicacion: {
           direccion: form.direccion,

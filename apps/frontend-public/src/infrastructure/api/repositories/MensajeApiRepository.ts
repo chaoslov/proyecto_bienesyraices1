@@ -31,11 +31,11 @@ export const MensajeApi = {
     })
   },
 
-  async listarPorAsesor(asesorId: string, filtros?: { leido?: boolean; archivado?: boolean }): Promise<MensajeFromAPI[]> {
+  async listarMios(filtros?: { leido?: boolean; archivado?: boolean }): Promise<MensajeFromAPI[]> {
     const params: Record<string, string | number | undefined> = {}
     if (filtros?.leido !== undefined) params.leido = String(filtros.leido)
     if (filtros?.archivado !== undefined) params.archivado = String(filtros.archivado)
-    return api.get<MensajeFromAPI[]>(`/mensajes/asesor/${asesorId}`, params)
+    return api.get<MensajeFromAPI[]>('/mensajes', params)
   },
 
   async marcarLeido(id: string): Promise<any> {

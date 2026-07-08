@@ -30,8 +30,9 @@ export const EditarPropiedadPage = () => {
   })
 
   useEffect(() => {
-    if (!id) return
+    if (!id) { setCargando(false); return }
     PropiedadApi.obtenerRaw(id).then((raw: any) => {
+      if (!raw) { setError('Propiedad no encontrada'); return }
       const p = raw
       setForm({
         titulo: p.titulo,
@@ -52,6 +53,8 @@ export const EditarPropiedadPage = () => {
         archivos: [],
         imagenesExistentes: (p.imagenes || []).map((i: any) => ({ id: i.id, url: i.url })),
       })
+    }).catch((err: any) => {
+      setError(err?.message || 'Error al cargar la propiedad')
     }).finally(() => setCargando(false))
   }, [id])
 

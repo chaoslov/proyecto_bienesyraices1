@@ -24,16 +24,13 @@ export const DashboardPage = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const asesorId = user?.asesor?.id
-    if (!asesorId) return
-
     Promise.all([
-      PropiedadApi.listar({ asesorId }, 1, 100),
-      PropiedadApi.listar({ asesorId, tipoTransaccion: 'venta' }, 1, 1),
-      PropiedadApi.listar({ asesorId, tipoTransaccion: 'alquiler' }, 1, 1),
-      PropiedadApi.listar({ asesorId, estado: 'activa' }, 1, 1),
-      MensajeApi.listarPorAsesor(asesorId, { leido: false }),
-      MensajeApi.listarPorAsesor(asesorId),
+      PropiedadApi.listarMias(1, 100),
+      PropiedadApi.listarMias(1, 1, { tipoTransaccion: 'venta' }),
+      PropiedadApi.listarMias(1, 1, { tipoTransaccion: 'alquiler' }),
+      PropiedadApi.listarMias(1, 1, { estado: 'activa' }),
+      MensajeApi.listarMios({ leido: false }),
+      MensajeApi.listarMios(),
     ]).then(([todas, venta, alquiler, activas, noLeidos, todosMensajes]) => {
       setStats({
         totalPropiedades: todas.total,
@@ -42,6 +39,11 @@ export const DashboardPage = () => {
         activas: activas.total,
         mensajesNoLeidos: noLeidos.length,
         totalMensajes: todosMensajes.length,
+      })
+    }).catch(() => {
+      setStats({
+        totalPropiedades: 0, enVenta: 0, enAlquiler: 0, activas: 0,
+        mensajesNoLeidos: 0, totalMensajes: 0,
       })
     }).finally(() => setLoading(false))
   }, [user])

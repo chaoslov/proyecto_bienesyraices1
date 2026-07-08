@@ -365,11 +365,6 @@ export const PerfilPage = () => {
                     <span>{form.telefono || 'No registrado'}</span>
                   </p>
                 </div>
-                {form.descripcion && (
-                  <p className="text-xs text-gray-400 mt-3 leading-relaxed line-clamp-3">
-                    {form.descripcion}
-                  </p>
-                )}
                 <div className="mt-3">
                   <button className="w-full py-2.5 px-4 bg-[#2C3E50] text-white font-medium rounded-lg hover:bg-[#1A252F] transition-colors text-sm">
                     Ver Perfil
