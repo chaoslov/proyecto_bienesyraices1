@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { PropiedadService } from '../../application/services/PropiedadService'
 import { getId } from '../middlewares/validateId'
+import { getAsesorId } from '../middlewares/authMiddleware'
 
 export class PropiedadController {
   constructor(private service: PropiedadService) {}
@@ -23,6 +24,16 @@ export class PropiedadController {
     }
   }
 
+  listarMias = async (req: Request, res: Response) => {
+    try {
+      const asesorId = getAsesorId(req)
+      const result = await this.service.listarMias(asesorId)
+      res.json(result)
+    } catch (error: any) {
+      res.status(error.status || 500).json({ message: error.message || 'Error interno' })
+    }
+  }
+
   obtenerPorId = async (req: Request, res: Response) => {
     try {
       const propiedad = await this.service.obtenerPorId(getId(req))
@@ -34,7 +45,8 @@ export class PropiedadController {
 
   crear = async (req: Request, res: Response) => {
     try {
-      const propiedad = await this.service.crear(req.body)
+      const body = { ...req.body, asesorId: getAsesorId(req) }
+      const propiedad = await this.service.crear(body)
       res.status(201).json(propiedad)
     } catch (error: any) {
       if (error.errors) {
@@ -46,7 +58,7 @@ export class PropiedadController {
 
   actualizar = async (req: Request, res: Response) => {
     try {
-      const propiedad = await this.service.actualizar(getId(req), req.body)
+      const propiedad = await this.service.actualizar(getId(req), req.body, (req as any).user)
       res.json(propiedad)
     } catch (error: any) {
       if (error.errors) {
@@ -58,7 +70,7 @@ export class PropiedadController {
 
   eliminar = async (req: Request, res: Response) => {
     try {
-      await this.service.eliminar(getId(req))
+      await this.service.eliminar(getId(req), (req as any).user)
       res.status(204).send()
     } catch (error: any) {
       console.error('Error al eliminar propiedad:', error)
@@ -68,7 +80,7 @@ export class PropiedadController {
 
   cambiarEstado = async (req: Request, res: Response) => {
     try {
-      const propiedad = await this.service.cambiarEstado(getId(req), req.body.estado)
+      const propiedad = await this.service.cambiarEstado(getId(req), req.body.estado, (req as any).user)
       res.json(propiedad)
     } catch (error: any) {
       res.status(error.status || 500).json({ message: error.message || 'Error interno' })

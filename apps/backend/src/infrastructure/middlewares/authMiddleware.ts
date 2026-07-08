@@ -7,6 +7,7 @@ export interface TokenPayload {
   id: string
   email: string
   rol: string
+  asesorId: string | null
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
@@ -35,4 +36,12 @@ export function requireRol(...roles: string[]) {
     }
     next()
   }
+}
+
+export function getAsesorId(req: Request): string {
+  const user = (req as any).user as TokenPayload
+  if (!user?.asesorId) {
+    throw { status: 403, message: 'Acción solo para asesores' }
+  }
+  return user.asesorId
 }

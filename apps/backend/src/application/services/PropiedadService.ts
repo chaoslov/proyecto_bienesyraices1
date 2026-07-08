@@ -19,6 +19,10 @@ export class PropiedadService {
     return this.repository.findDestacadas()
   }
 
+  async listarMias(asesorId: string) {
+    return this.repository.findAll({ asesorId })
+  }
+
   async obtenerPorId(id: string) {
     const propiedad = await this.repository.findById(id)
     if (!propiedad) throw { status: 404, message: 'Propiedad no encontrada' }
@@ -37,9 +41,11 @@ export class PropiedadService {
     }
   }
 
-  async actualizar(id: string, data: any) {
+  async actualizar(id: string, data: any, user?: { id: string; rol: string; asesorId: string | null }) {
     const exists = await this.repository.findById(id)
     if (!exists) throw { status: 404, message: 'Propiedad no encontrada' }
+
+    this.verificarOwnership(exists, user)
 
     try {
       const validData = updatePropiedadSchema.parse(data)
@@ -52,17 +58,30 @@ export class PropiedadService {
     }
   }
 
-  async eliminar(id: string) {
+  async eliminar(id: string, user?: { id: string; rol: string; asesorId: string | null }) {
     const exists = await this.repository.findById(id)
     if (!exists) throw { status: 404, message: 'Propiedad no encontrada' }
+
+    this.verificarOwnership(exists, user)
 
     await this.imagenService.eliminarPorPropiedadId(id)
     await this.repository.delete(id)
   }
 
-  async cambiarEstado(id: string, estado: string) {
+  async cambiarEstado(id: string, estado: string, user?: { id: string; rol: string; asesorId: string | null }) {
     const exists = await this.repository.findById(id)
     if (!exists) throw { status: 404, message: 'Propiedad no encontrada' }
+
+    this.verificarOwnership(exists, user)
+
     return this.repository.update(id, { estado })
+  }
+
+  private verificarOwnership(propiedad: any, user?: { id: string; rol: string; asesorId: string | null }) {
+    if (!user) return
+    if (user.rol === 'admin') return
+    if (propiedad.asesorId !== user.asesorId) {
+      throw { status: 403, message: 'No tienes permisos sobre esta propiedad' }
+    }
   }
 }
