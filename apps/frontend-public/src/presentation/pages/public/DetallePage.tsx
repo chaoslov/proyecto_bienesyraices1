@@ -61,7 +61,6 @@ export const DetallePage = () => {
   const [envioExitoso, setEnvioExitoso] = useState(false)
   const [currentImage, setCurrentImage] = useState(0)
   const [similares, setSimilares] = useState<any[]>([])
-  const [asesor, setAsesor] = useState<Asesor | null>(null)
 
   useEffect(() => {
     if (asesores.length === 0) {
@@ -80,9 +79,6 @@ export const DetallePage = () => {
         PropiedadApi.listar({ tipoPropiedad: p.tipoInmueble }, 1, 4).then((res) => {
           setSimilares(res.data.filter((s: any) => s.id !== p.id).slice(0, 3))
         }).catch(() => {})
-        if (p.asesorId) {
-          AsesorApi.obtenerPorId(p.asesorId).then(setAsesor).catch(() => {})
-        }
       }
     })
   }, [id, fetchPorId])
