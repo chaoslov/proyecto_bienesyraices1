@@ -27,21 +27,38 @@ export class MensajeService {
     }
   }
 
-  async marcarLeido(id: string) {
+  async marcarLeido(id: string, user?: { id: string; rol: string; asesorId: string | null }) {
     const exists = await this.repository.findById(id)
     if (!exists) throw { status: 404, message: 'Mensaje no encontrado' }
+
+    this.verificarOwnership(exists, user)
+
     return this.repository.update(id, { leido: true })
   }
 
-  async archivar(id: string) {
+  async archivar(id: string, user?: { id: string; rol: string; asesorId: string | null }) {
     const exists = await this.repository.findById(id)
     if (!exists) throw { status: 404, message: 'Mensaje no encontrado' }
+
+    this.verificarOwnership(exists, user)
+
     return this.repository.update(id, { archivado: true })
   }
 
-  async eliminar(id: string) {
+  async eliminar(id: string, user?: { id: string; rol: string; asesorId: string | null }) {
     const exists = await this.repository.findById(id)
     if (!exists) throw { status: 404, message: 'Mensaje no encontrado' }
+
+    this.verificarOwnership(exists, user)
+
     await this.repository.delete(id)
+  }
+
+  private verificarOwnership(mensaje: any, user?: { id: string; rol: string; asesorId: string | null }) {
+    if (!user) return
+    if (user.rol === 'admin') return
+    if (mensaje.asesorId !== user.asesorId) {
+      throw { status: 403, message: 'No tienes permisos sobre este mensaje' }
+    }
   }
 }

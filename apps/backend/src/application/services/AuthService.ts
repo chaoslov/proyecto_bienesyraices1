@@ -21,7 +21,7 @@ export class AuthService {
       if (!passwordValido) throw { status: 401, message: 'Credenciales inválidas' }
 
       const token = jwt.sign(
-        { id: user.id, email: user.email, rol: user.rol },
+        { id: user.id, email: user.email, rol: user.rol, asesorId: user.asesor?.id || null },
         JWT_SECRET,
         { expiresIn: '7d' },
       )
