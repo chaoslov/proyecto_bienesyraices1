@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { LayoutPublico } from './presentation/components/layout/LayoutPublico'
 import { LayoutPrivado } from './presentation/components/layout/LayoutPrivado'
 import { PrivateRoute } from './presentation/components/auth/PrivateRoute'
@@ -16,8 +17,15 @@ import { EditarPropiedadPage } from './presentation/pages/private/EditarPropieda
 import { MensajesPage } from './presentation/pages/private/MensajesPage'
 import { PerfilPage } from './presentation/pages/private/PerfilPage'
 import { ServicioVentaPage } from './presentation/pages/public/ServicioVentaPage'
+import { useAuthStore } from './application/store/authStore'
 
 function App() {
+  const { token, checkAuth } = useAuthStore()
+
+  useEffect(() => {
+    if (token) checkAuth()
+  }, [])
+
   return (
     <Routes>
       <Route path="/" element={<LayoutPublico />}>
@@ -28,11 +36,13 @@ function App() {
         <Route path="asesores/:id" element={<PerfilAsesorPage />} />
         <Route path="servicios/venta" element={<ServicioVentaPage />} />
         <Route path="login" element={<LoginPage />} />
+        <Route path="admin" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
       <Route path="/panel" element={<PrivateRoute />}>
         <Route element={<LayoutPrivado />}>
           <Route index element={<DashboardPage />} />
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="propiedades" element={<MisPropiedadesPage />} />
           <Route path="propiedades/nueva" element={<NuevaPropiedadPage />} />
           <Route path="propiedades/editar/:id" element={<EditarPropiedadPage />} />
