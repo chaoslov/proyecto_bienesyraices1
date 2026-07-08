@@ -6,6 +6,7 @@ export interface Asesor {
   telefono: string
   fotografia: string
   especialidad: string
+  descripcion?: string
   experiencia: number
   creadoEn: Date
   propiedadesCount?: number

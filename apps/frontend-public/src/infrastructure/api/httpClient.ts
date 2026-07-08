@@ -53,4 +53,21 @@ export const api = {
 
   delete: <T>(path: string) =>
     request<T>(path, { method: 'DELETE' }),
+
+  postForm: <T>(path: string, formData: FormData) => {
+    const token = localStorage.getItem('token')
+    return fetch(`${BASE_URL}${path}`, {
+      method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    }).then(async (res) => {
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: 'Error de conexión' }))
+        throw { status: res.status, ...error }
+      }
+      return res.json() as Promise<T>
+    })
+  },
 }
