@@ -201,39 +201,39 @@ export const DetallePage = () => {
           </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-            <div className="group bg-white border border-orange-200 rounded-xl px-2.5 flex items-center justify-center gap-3 hover:shadow-lg hover:border-[#C47B4A] transition-all duration-300 cursor-default h-28">
+            <div className="group bg-white border border-orange-200 rounded-xl px-2 py-3 flex flex-col items-center justify-center gap-1.5 hover:shadow-lg hover:border-[#C47B4A] transition-all duration-300 cursor-default h-28">
               <div className="w-11 h-11 bg-[#C47B4A]/10 rounded-xl flex items-center justify-center text-[#C47B4A] group-hover:bg-[#C47B4A] group-hover:text-white transition-colors duration-300 flex-shrink-0">
                 <BedIcon />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-800 -mb-0.5">{propiedad.habitaciones}</p>
+              <div className="text-center">
+                <p className="text-lg font-bold text-gray-800">{propiedad.habitaciones}</p>
                 <p className="text-[11px] text-gray-500 uppercase tracking-wider">Dormitorios</p>
               </div>
             </div>
-            <div className="group bg-white border border-orange-200 rounded-xl px-2.5 flex items-center justify-center gap-3 hover:shadow-lg hover:border-[#C47B4A] transition-all duration-300 cursor-default h-28">
+            <div className="group bg-white border border-orange-200 rounded-xl px-2 py-3 flex flex-col items-center justify-center gap-1.5 hover:shadow-lg hover:border-[#C47B4A] transition-all duration-300 cursor-default h-28">
               <div className="w-11 h-11 bg-[#C47B4A]/10 rounded-xl flex items-center justify-center text-[#C47B4A] group-hover:bg-[#C47B4A] group-hover:text-white transition-colors duration-300 flex-shrink-0">
                 <BathIcon />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-800 -mb-0.5">{propiedad.banos}</p>
+              <div className="text-center">
+                <p className="text-lg font-bold text-gray-800">{propiedad.banos}</p>
                 <p className="text-[11px] text-gray-500 uppercase tracking-wider">Baños</p>
               </div>
             </div>
-            <div className="group bg-white border border-orange-200 rounded-xl px-2.5 flex items-center justify-center gap-3 hover:shadow-lg hover:border-[#C47B4A] transition-all duration-300 cursor-default h-28">
+            <div className="group bg-white border border-orange-200 rounded-xl px-2 py-3 flex flex-col items-center justify-center gap-1.5 hover:shadow-lg hover:border-[#C47B4A] transition-all duration-300 cursor-default h-28">
               <div className="w-11 h-11 bg-[#C47B4A]/10 rounded-xl flex items-center justify-center text-[#C47B4A] group-hover:bg-[#C47B4A] group-hover:text-white transition-colors duration-300 flex-shrink-0">
                 <AreaIcon />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-800 -mb-0.5">{propiedad.areaTotal}</p>
+              <div className="text-center">
+                <p className="text-lg font-bold text-gray-800">{propiedad.areaTotal}</p>
                 <p className="text-[11px] text-gray-500 uppercase tracking-wider">M²</p>
               </div>
             </div>
-            <div className="group bg-white border border-orange-200 rounded-xl px-2.5 flex items-center justify-center gap-3 hover:shadow-lg hover:border-[#C47B4A] transition-all duration-300 cursor-default h-28">
+            <div className="group bg-white border border-orange-200 rounded-xl px-2 py-3 flex flex-col items-center justify-center gap-1.5 hover:shadow-lg hover:border-[#C47B4A] transition-all duration-300 cursor-default h-28">
               <div className="w-11 h-11 bg-[#C47B4A]/10 rounded-xl flex items-center justify-center text-[#C47B4A] group-hover:bg-[#C47B4A] group-hover:text-white transition-colors duration-300 flex-shrink-0">
                 <TagIcon />
               </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-800 capitalize -mb-0.5">{propiedad.tipoInmueble}</p>
+              <div className="text-center">
+                <p className="text-lg font-bold text-gray-800 capitalize">{propiedad.tipoInmueble}</p>
                 <p className="text-[11px] text-gray-500 uppercase tracking-wider">Tipo</p>
               </div>
             </div>
