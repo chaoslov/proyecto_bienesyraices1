@@ -11,7 +11,7 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  const from = (location.state as any)?.from?.pathname || '/panel'
+  const from = (location.state as any)?.from?.pathname || '/'
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
