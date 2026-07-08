@@ -1,43 +1,56 @@
-import { useEffect, useState, FormEvent } from 'react'
+import { useEffect, useState, FormEvent, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PropiedadApi } from '@/infrastructure/api/repositories/PropiedadApiRepository'
-import { ArrowLeft } from 'lucide-react'
+import { uploadService } from '@/infrastructure/upload/uploadService'
+import { MapaSelector } from '@/presentation/components/map/MapaSelector'
+import { ArrowLeft, Upload, X, Loader2 } from 'lucide-react'
+
+interface ImagenInfo {
+  id: string
+  url: string
+}
 
 export const EditarPropiedadPage = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [cargando, setCargando] = useState(true)
   const [enviando, setEnviando] = useState(false)
+  const [eliminandoImg, setEliminandoImg] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
     titulo: '', descripcion: '', precio: '', tipoPropiedad: 'casa',
     tipoTransaccion: 'venta', habitaciones: '', banos: '', parqueos: '',
     areaTotal: '', metrajeConstruido: '',
     direccion: '', sector: '', ciudad: 'Guayaquil',
-    latitud: '', longitud: '', imagenes: [''] as string[],
+    latitud: 0, longitud: 0,
+    archivos: [] as File[],
+    imagenesExistentes: [] as ImagenInfo[],
   })
 
   useEffect(() => {
     if (!id) return
-    PropiedadApi.obtenerPorId(id).then((p) => {
+    PropiedadApi.obtenerRaw(id).then((raw: any) => {
+      const p = raw
       setForm({
         titulo: p.titulo,
         descripcion: p.descripcion || '',
         precio: String(p.precio),
-        tipoPropiedad: p.tipoInmueble,
+        tipoPropiedad: p.tipoPropiedad,
         tipoTransaccion: p.tipoTransaccion,
         habitaciones: String(p.habitaciones || ''),
-        banos: String(p.banos || ''),
-        parqueos: '',
-        areaTotal: String(p.areaTotal || ''),
-        metrajeConstruido: '',
+        banos: String(p.banios || ''),
+        parqueos: String(p.parqueos || ''),
+        areaTotal: String(p.metrajeTotal || ''),
+        metrajeConstruido: String(p.metrajeConstruido || ''),
         direccion: p.ubicacion?.direccion || '',
-        sector: '',
+        sector: p.ubicacion?.sector || '',
         ciudad: p.ubicacion?.ciudad || 'Guayaquil',
-        latitud: String(p.ubicacion?.latitud || ''),
-        longitud: String(p.ubicacion?.longitud || ''),
-        imagenes: p.imagenes?.length ? p.imagenes : [''],
+        latitud: p.ubicacion?.latitud || 0,
+        longitud: p.ubicacion?.longitud || 0,
+        archivos: [],
+        imagenesExistentes: (p.imagenes || []).map((i: any) => ({ id: i.id, url: i.url })),
       })
     }).finally(() => setCargando(false))
   }, [id])
@@ -52,7 +65,6 @@ export const EditarPropiedadPage = () => {
     }
     setEnviando(true)
     try {
-      const imagenes = form.imagenes.filter(Boolean)
       await PropiedadApi.actualizar(id, {
         titulo: form.titulo,
         descripcion: form.descripcion,
@@ -64,7 +76,7 @@ export const EditarPropiedadPage = () => {
         parqueos: form.parqueos,
         areaTotal: form.areaTotal,
         metrajeConstruido: form.metrajeConstruido,
-        imagenes: imagenes.length ? imagenes : undefined,
+        imagenes: undefined,
         ubicacion: {
           direccion: form.direccion,
           sector: form.sector,
@@ -73,6 +85,11 @@ export const EditarPropiedadPage = () => {
           longitud: form.longitud || 0,
         },
       })
+
+      if (form.archivos.length > 0) {
+        await uploadService.subirImagenesPropiedad(id, form.archivos)
+      }
+
       navigate('/panel/propiedades')
     } catch (err: any) {
       setError(err?.message || 'Error al actualizar')
@@ -81,13 +98,38 @@ export const EditarPropiedadPage = () => {
     }
   }
 
-  const agregarImagen = () => setForm({ ...form, imagenes: [...form.imagenes, ''] })
-  const cambiarImagen = (idx: number, val: string) => {
-    const imgs = [...form.imagenes]; imgs[idx] = val; setForm({ ...form, imagenes: imgs })
+  const MAX_IMAGENES = 25
+
+  const agregarArchivos = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const nuevos = Array.from(e.target.files)
+      const total = form.archivos.length + nuevos.length + form.imagenesExistentes.length
+      if (total > MAX_IMAGENES) {
+        setError(`Máximo ${MAX_IMAGENES} imágenes permitidas`)
+        return
+      }
+      setForm({ ...form, archivos: [...form.archivos, ...nuevos] })
+    }
+    e.target.value = ''
   }
-  const quitarImagen = (idx: number) => {
-    const imgs = form.imagenes.filter((_, i) => i !== idx)
-    setForm({ ...form, imagenes: imgs.length ? imgs : [''] })
+
+  const quitarArchivo = (idx: number) => {
+    setForm({ ...form, archivos: form.archivos.filter((_, i) => i !== idx) })
+  }
+
+  const eliminarImagenExistente = async (img: ImagenInfo) => {
+    setEliminandoImg(img.id)
+    try {
+      await PropiedadApi.eliminarImagen(img.id)
+      setForm({
+        ...form,
+        imagenesExistentes: form.imagenesExistentes.filter((i) => i.id !== img.id),
+      })
+    } catch (err: any) {
+      setError(err?.message || 'Error al eliminar la imagen')
+    } finally {
+      setEliminandoImg(null)
+    }
   }
 
   const inputCls = "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C47B4A] focus:border-transparent text-sm"
@@ -104,80 +146,84 @@ export const EditarPropiedadPage = () => {
   return (
     <div>
       <button onClick={() => navigate('/panel/propiedades')} className="flex items-center gap-1 text-sm text-gray-500 hover:text-[#2C3E50] mb-4">
-        <ArrowLeft className="w-4 h-4" /> Volver a mis propiedades
+        <ArrowLeft className="w-4 h-4" /> Cancelar cambios
       </button>
 
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Editar Propiedad</h1>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-6 max-w-3xl">
+      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-6">
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="md:col-span-2">
-            <label className={labelCls}>Título *</label>
-            <input className={inputCls} value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} required />
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div>
+              <label className={labelCls}>Título *</label>
+              <input className={inputCls} value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} required />
+            </div>
 
-          <div className="md:col-span-2">
-            <label className={labelCls}>Descripción</label>
-            <textarea className={inputCls} rows={3} value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} />
-          </div>
+            <div>
+              <label className={labelCls}>Descripción</label>
+              <textarea className={inputCls} rows={3} value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} />
+            </div>
 
-          <div>
-            <label className={labelCls}>Precio (USD) *</label>
-            <input type="number" className={inputCls} value={form.precio} onChange={(e) => setForm({ ...form, precio: e.target.value })} required />
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>Precio (USD) *</label>
+                <input type="number" className={inputCls} value={form.precio} onChange={(e) => setForm({ ...form, precio: e.target.value })} required />
+              </div>
+              <div>
+                <label className={labelCls}>Tipo Transacción</label>
+                <select className={inputCls} value={form.tipoTransaccion} onChange={(e) => setForm({ ...form, tipoTransaccion: e.target.value })}>
+                  <option value="venta">Venta</option>
+                  <option value="alquiler">Alquiler</option>
+                </select>
+              </div>
+            </div>
 
-          <div>
-            <label className={labelCls}>Tipo de Transacción</label>
-            <select className={inputCls} value={form.tipoTransaccion} onChange={(e) => setForm({ ...form, tipoTransaccion: e.target.value })}>
-              <option value="venta">Venta</option>
-              <option value="alquiler">Alquiler</option>
-            </select>
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>Tipo Propiedad</label>
+                <select className={inputCls} value={form.tipoPropiedad} onChange={(e) => setForm({ ...form, tipoPropiedad: e.target.value })}>
+                  <option value="casa">Casa</option>
+                  <option value="departamento">Departamento</option>
+                  <option value="terreno">Terreno</option>
+                  <option value="local">Local</option>
+                  <option value="oficina">Oficina</option>
+                </select>
+              </div>
+            </div>
 
-          <div>
-            <label className={labelCls}>Tipo de Propiedad</label>
-            <select className={inputCls} value={form.tipoPropiedad} onChange={(e) => setForm({ ...form, tipoPropiedad: e.target.value })}>
-              <option value="casa">Casa</option>
-              <option value="departamento">Departamento</option>
-              <option value="terreno">Terreno</option>
-              <option value="local">Local</option>
-              <option value="oficina">Oficina</option>
-            </select>
-          </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className={labelCls}>Habitaciones</label>
+                <input type="number" className={inputCls} value={form.habitaciones} onChange={(e) => setForm({ ...form, habitaciones: e.target.value })} />
+              </div>
+              <div>
+                <label className={labelCls}>Baños</label>
+                <input type="number" className={inputCls} value={form.banos} onChange={(e) => setForm({ ...form, banos: e.target.value })} />
+              </div>
+              <div>
+                <label className={labelCls}>Parqueos</label>
+                <input type="number" className={inputCls} value={form.parqueos} onChange={(e) => setForm({ ...form, parqueos: e.target.value })} />
+              </div>
+            </div>
 
-          <div>
-            <label className={labelCls}>Habitaciones</label>
-            <input type="number" className={inputCls} value={form.habitaciones} onChange={(e) => setForm({ ...form, habitaciones: e.target.value })} />
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>Área Total (m²)</label>
+                <input type="number" className={inputCls} value={form.areaTotal} onChange={(e) => setForm({ ...form, areaTotal: e.target.value })} />
+              </div>
+              <div>
+                <label className={labelCls}>Área Construida (m²)</label>
+                <input type="number" className={inputCls} value={form.metrajeConstruido} onChange={(e) => setForm({ ...form, metrajeConstruido: e.target.value })} />
+              </div>
+            </div>
 
-          <div>
-            <label className={labelCls}>Baños</label>
-            <input type="number" className={inputCls} value={form.banos} onChange={(e) => setForm({ ...form, banos: e.target.value })} />
-          </div>
-
-          <div>
-            <label className={labelCls}>Parqueos</label>
-            <input type="number" className={inputCls} value={form.parqueos} onChange={(e) => setForm({ ...form, parqueos: e.target.value })} />
-          </div>
-
-          <div>
-            <label className={labelCls}>Área Total (m²)</label>
-            <input type="number" className={inputCls} value={form.areaTotal} onChange={(e) => setForm({ ...form, areaTotal: e.target.value })} />
-          </div>
-
-          <div>
-            <label className={labelCls}>Área Construida (m²)</label>
-            <input type="number" className={inputCls} value={form.metrajeConstruido} onChange={(e) => setForm({ ...form, metrajeConstruido: e.target.value })} />
-          </div>
-
-          <div className="md:col-span-2">
-            <div className="border-t pt-4 mt-2">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Ubicación</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="border-t pt-4">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">Dirección</h3>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>Dirección</label>
                   <input className={inputCls} value={form.direccion} onChange={(e) => setForm({ ...form, direccion: e.target.value })} />
@@ -193,39 +239,95 @@ export const EditarPropiedadPage = () => {
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className={labelCls}>Latitud</label>
-                    <input type="number" step="any" className={inputCls} value={form.latitud} onChange={(e) => setForm({ ...form, latitud: e.target.value })} />
+                    <input type="number" step="any" className={inputCls} value={form.latitud} onChange={(e) => setForm({ ...form, latitud: Number(e.target.value) })} />
                   </div>
                   <div>
                     <label className={labelCls}>Longitud</label>
-                    <input type="number" step="any" className={inputCls} value={form.longitud} onChange={(e) => setForm({ ...form, longitud: e.target.value })} />
+                    <input type="number" step="any" className={inputCls} value={form.longitud} onChange={(e) => setForm({ ...form, longitud: Number(e.target.value) })} />
                   </div>
                 </div>
               </div>
             </div>
+
           </div>
 
-          <div className="md:col-span-2">
-            <div className="border-t pt-4 mt-2">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-700">Imágenes (URLs)</h3>
-                <button type="button" onClick={agregarImagen} className="text-xs text-[#C47B4A] hover:underline">+ Agregar</button>
-              </div>
-              {form.imagenes.map((url, idx) => (
-                <div key={idx} className="flex gap-2 mb-2">
-                  <input className={inputCls} placeholder="https://..." value={url} onChange={(e) => cambiarImagen(idx, e.target.value)} />
-                  {form.imagenes.length > 1 && (
-                    <button type="button" onClick={() => quitarImagen(idx)} className="text-red-500 text-sm px-2">×</button>
-                  )}
+          <div className="space-y-4">
+            <div className="bg-gray-50 rounded-lg p-4 border">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                Imágenes ({form.imagenesExistentes.length + form.archivos.length}/{MAX_IMAGENES})
+              </h3>
+
+              {(form.imagenesExistentes.length > 0 || form.archivos.length > 0) && (
+                <div className="mb-3 grid grid-cols-5 gap-2">
+                  {form.imagenesExistentes.map((img, idx) => (
+                    <div key={`existente-${idx}`} className="relative group aspect-square rounded-lg overflow-hidden bg-gray-100 border">
+                      <img src={img.url} alt="" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => eliminarImagenExistente(img)}
+                        disabled={eliminandoImg === img.id}
+                        className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-100"
+                      >
+                        {eliminandoImg === img.id ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <X className="w-3 h-3" />
+                        )}
+                      </button>
+                    </div>
+                  ))}
+                  {form.archivos.map((file, idx) => (
+                    <div key={`nuevo-${idx}`} className="relative group aspect-square rounded-lg overflow-hidden bg-gray-100 border">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => quitarArchivo(idx)}
+                        className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/jpeg,image/png,image/webp"
+                onChange={agregarArchivos}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={form.imagenesExistentes.length + form.archivos.length >= MAX_IMAGENES}
+                className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-[#C47B4A] hover:text-[#C47B4A] transition w-full justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Upload className="w-4 h-4" />
+                {form.imagenesExistentes.length + form.archivos.length >= MAX_IMAGENES ? 'Límite alcanzado' : 'Agregar imágenes'}
+              </button>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700">Ubicación en el mapa</h3>
+              <p className="text-xs text-gray-400 mt-1 mb-2">Haz clic en el mapa para ajustar la ubicación exacta</p>
+              <MapaSelector
+                latitud={form.latitud}
+                longitud={form.longitud}
+                onChange={(lat, lng) => setForm({ ...form, latitud: lat, longitud: lng })}
+                altura="500px"
+              />
             </div>
           </div>
         </div>
 
         <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-          <button type="button" onClick={() => navigate('/panel/propiedades')} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">
-            Cancelar
-          </button>
           <button type="submit" disabled={enviando} className="bg-[#2C3E50] text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-[#1a2a3a] disabled:opacity-50">
             {enviando ? 'Guardando...' : 'Guardar Cambios'}
           </button>
