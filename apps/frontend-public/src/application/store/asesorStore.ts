@@ -28,7 +28,7 @@ export const useAsesorStore = create<AsesorState>((set) => ({
       const asesores = await AsesorApi.listar()
       set({ asesores, loading: false })
     } catch {
-      set({ asesores: asesoresMock, loading: false })
+      set({ asesores: [], loading: false, error: 'No se pudieron cargar los asesores. Intenta de nuevo más tarde.' })
     }
   },
 }))
