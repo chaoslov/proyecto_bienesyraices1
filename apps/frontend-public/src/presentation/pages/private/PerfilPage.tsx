@@ -1,18 +1,48 @@
-import { useState, FormEvent, useEffect, useRef } from 'react'
+import { useState, FormEvent, useEffect, useRef, useCallback } from 'react'
 import { useAuthStore } from '@/application/store/authStore'
 import { api } from '@/infrastructure/api/httpClient'
 import { uploadService } from '@/infrastructure/upload/uploadService'
-import { Camera, Phone } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Camera, Phone, ZoomIn, X } from 'lucide-react'
+import Cropper from 'react-easy-crop'
+import type { Area } from 'react-easy-crop'
+
+function createImage(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => resolve(img)
+    img.onerror = reject
+    img.src = url
+  })
+}
+
+function getCroppedBlob(imageSrc: string, pixelCrop: Area): Promise<Blob> {
+  return new Promise(async (resolve, reject) => {
+    const image = await createImage(imageSrc)
+    const canvas = document.createElement('canvas')
+    canvas.width = pixelCrop.width
+    canvas.height = pixelCrop.height
+    const ctx = canvas.getContext('2d')!
+    ctx.drawImage(
+      image,
+      pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height,
+      0, 0, pixelCrop.width, pixelCrop.height,
+    )
+    canvas.toBlob((b) => {
+      if (b) resolve(b)
+      else reject(new Error('Error al generar el blob'))
+    }, 'image/jpeg', 0.92)
+  })
+}
 
 export const PerfilPage = () => {
-  const navigate = useNavigate()
   const { user } = useAuthStore()
   const [enviando, setEnviando] = useState(false)
   const [subiendoFoto, setSubiendoFoto] = useState(false)
   const [exito, setExito] = useState('')
   const [error, setError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+
   const [form, setForm] = useState({
     nombre: '', telefono: '', especialidad: '', descripcion: '', foto: '',
     email: '', añosExperiencia: 0,
@@ -21,6 +51,16 @@ export const PerfilPage = () => {
     nombre: '', telefono: '', especialidad: '', descripcion: '', foto: '',
     email: '', añosExperiencia: 0,
   })
+
+  // Crop state
+  const [cropFile, setCropFile] = useState<{ file: File; url: string } | null>(null)
+  const [crop, setCrop] = useState({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
+
+  const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
+    setCroppedAreaPixels(croppedPixels)
+  }, [])
 
   useEffect(() => {
     if (user?.asesor) {
@@ -81,19 +121,46 @@ export const PerfilPage = () => {
   const cambiarFoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !user?.asesor?.id) return
+    setError('')
+
+    // Validate dimensions
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    await new Promise<void>((resolve) => { img.onload = () => resolve(); img.src = url })
+    if (img.width > 1400 || img.height > 1400) {
+      setError(`La imagen es demasiado grande (${img.width}x${img.height}). Máximo 1400x1400 píxeles.`)
+      URL.revokeObjectURL(url)
+      e.target.value = ''
+      return
+    }
+
+    setCropFile({ file, url })
+    setCrop({ x: 0, y: 0 })
+    setZoom(1)
+  }
+
+  const aplicarRecorte = async () => {
+    if (!cropFile || !croppedAreaPixels || !user?.asesor?.id) return
     setSubiendoFoto(true)
     setError('')
     try {
-      const url = await uploadService.subirFotoAsesor(user.asesor.id, file)
-      setForm({ ...form, foto: url })
-      // Don't call checkAuth() here to avoid resetting original state
-      // The navbar avatar will update on next page reload or form save
+      const blob = await getCroppedBlob(cropFile.url, croppedAreaPixels)
+      const croppedFile = new File([blob], cropFile.file.name, { type: 'image/jpeg' })
+      const fotoUrl = await uploadService.subirFotoAsesor(user.asesor.id, croppedFile)
+      setForm({ ...form, foto: fotoUrl })
+      setCropFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
     } catch (err: any) {
       setError(err?.message || 'Error al subir foto')
     } finally {
       setSubiendoFoto(false)
-      e.target.value = ''
     }
+  }
+
+  const cerrarRecorte = () => {
+    if (cropFile) URL.revokeObjectURL(cropFile.url)
+    setCropFile(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const inputCls = "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C47B4A] focus:border-transparent text-sm"
@@ -145,6 +212,74 @@ export const PerfilPage = () => {
                   onChange={cambiarFoto}
                   className="hidden"
                 />
+
+          {/* Crop Modal */}
+          {cropFile && (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+              <div className="fixed inset-0 bg-black/70" onClick={cerrarRecorte} />
+              <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 border-b">
+                  <h3 className="text-sm font-bold text-gray-800">Ajustar foto</h3>
+                  <button onClick={cerrarRecorte} className="text-gray-400 hover:text-gray-600">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="relative w-full h-80 bg-gray-900">
+                  <Cropper
+                    image={cropFile.url}
+                    crop={crop}
+                    zoom={zoom}
+                    aspect={4 / 3}
+                    onCropChange={setCrop}
+                    onZoomChange={setZoom}
+                    onCropComplete={onCropComplete}
+                  />
+                </div>
+
+                <div className="px-4 py-3 border-t">
+                  <div className="flex items-center gap-3">
+                    <ZoomIn className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <input
+                      type="range"
+                      min={1}
+                      max={3}
+                      step={0.05}
+                      value={zoom}
+                      onChange={(e) => setZoom(Number(e.target.value))}
+                      className="flex-1 accent-[#C47B4A]"
+                    />
+                    <ZoomIn className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 px-4 py-3 border-t bg-gray-50">
+                  <button
+                    type="button"
+                    onClick={cerrarRecorte}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={aplicarRecorte}
+                    disabled={subiendoFoto}
+                    className="px-4 py-2 text-sm font-medium text-white bg-[#2C3E50] hover:bg-[#1a2a3a] rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {subiendoFoto ? (
+                      <>
+                        <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                        Subiendo...
+                      </>
+                    ) : (
+                      'Aplicar'
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
@@ -200,7 +335,7 @@ export const PerfilPage = () => {
           <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
             <h3 className="text-sm font-semibold text-gray-700 mb-4 text-center">Vista previa del perfil</h3>
             <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col border">
-              <div className="relative overflow-hidden bg-gray-200 aspect-video flex items-center justify-center">
+              <div className="relative overflow-hidden bg-gray-200 aspect-[4/3] flex items-center justify-center">
                 {form.foto ? (
                   <img src={form.foto} alt={form.nombre} className="w-full h-full object-cover" />
                 ) : (
