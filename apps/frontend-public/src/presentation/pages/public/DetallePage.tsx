@@ -2,6 +2,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { usePropiedadStore } from '@/application/store/propiedadStore'
 import { Button } from '@/presentation/components/ui/Botones'
+import { PropiedadCard } from '@/presentation/components/shared/PropiedadCard'
+import { PropiedadApi } from '@/infrastructure/api/repositories/PropiedadApiRepository'
 import { MensajeApi } from '@/infrastructure/api/repositories/MensajeApiRepository'
 
 export const DetallePage = () => {
@@ -13,6 +15,7 @@ export const DetallePage = () => {
   const [formData, setFormData] = useState({ nombre: '', email: '', telefono: '', mensaje: '' })
   const [enviando, setEnviando] = useState(false)
   const [envioExitoso, setEnvioExitoso] = useState(false)
+  const [similares, setSimilares] = useState<any[]>([])
 
   useEffect(() => {
     if (!id) return
@@ -22,6 +25,9 @@ export const DetallePage = () => {
       setLoading(false)
       if (p) {
         setFormData((prev) => ({ ...prev, mensaje: `Consulto sobre: ${p.titulo}` }))
+        PropiedadApi.listar({ tipoPropiedad: p.tipoInmueble }, 1, 4).then((res) => {
+          setSimilares(res.data.filter((s: any) => s.id !== p.id).slice(0, 3))
+        }).catch(() => {})
       }
     })
   }, [id, fetchPorId])
@@ -175,6 +181,17 @@ export const DetallePage = () => {
           )}
         </div>
       </div>
+
+      {similares.length > 0 && (
+        <section className="mt-12 border-t pt-8">
+          <h3 className="text-2xl font-bold text-[#2C3E50] mb-6">Propiedades Similares</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {similares.map((prop) => (
+              <PropiedadCard key={prop.id} propiedad={prop} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

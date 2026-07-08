@@ -1,19 +1,32 @@
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import { Asesor } from '@/domain/entities/Asesor'
 
 interface AsesorCardProps {
   asesor: Asesor
 }
 
+function Avatar({ asesor }: { asesor: Asesor }) {
+  const [error, setError] = useState(false)
+  return error || !asesor.fotografia ? (
+    <div className="w-full h-full flex items-center justify-center bg-[#2C3E50] text-white text-4xl font-bold">
+      {asesor.nombre[0]}{asesor.apellido[0]}
+    </div>
+  ) : (
+    <img
+      src={asesor.fotografia}
+      alt={`${asesor.nombre} ${asesor.apellido}`}
+      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+      onError={() => setError(true)}
+    />
+  )
+}
+
 export const AsesorCard = ({ asesor }: AsesorCardProps) => {
   return (
     <div className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
       <div className="relative overflow-hidden bg-gray-200 aspect-video">
-        <img
-          src={asesor.fotografia}
-          alt={`${asesor.nombre} ${asesor.apellido}`}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        <Avatar asesor={asesor} />
       </div>
 
       <div className="p-4 flex flex-col flex-grow">

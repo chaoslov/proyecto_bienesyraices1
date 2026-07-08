@@ -1,14 +1,31 @@
-import { useEffect} from 'react'
+import { useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { usePropiedadStore } from '@/application/store/propiedadStore'
 import { PropiedadCard } from '@/presentation/components/shared/PropiedadCard'
 import { Filtros } from '@/presentation/components/shared/Filtros'
+import { Paginacion } from '@/presentation/components/shared/Paginacion'
 
 export const CatalogoPage = () => {
-  const { propiedades, total, fetchPropiedades, loading, error, filtros } = usePropiedadStore()
+  const { propiedades, total, page, fetchPropiedades, loading, error, filtros, setFiltros } = usePropiedadStore()
+  const [searchParams] = useSearchParams()
+  const LIMIT = 12
+  const totalPages = Math.ceil(total / LIMIT)
+
+  const handlePageChange = (nuevaPagina: number) => {
+    fetchPropiedades(nuevaPagina)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   useEffect(() => {
     usePropiedadStore.getState().limpiarFiltros()
   }, [])
+
+  useEffect(() => {
+    const tipo = searchParams.get('tipo')
+    if (tipo) {
+      setFiltros({ tipoTransaccion: tipo })
+    }
+  }, [searchParams, setFiltros])
 
   useEffect(() => {
     const debounce = setTimeout(() => {
@@ -47,6 +64,14 @@ export const CatalogoPage = () => {
             <PropiedadCard key={prop.id} propiedad={prop} />
           ))}
         </div>
+      )}
+
+      {totalPages > 1 && (
+        <Paginacion
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       )}
     </div>
   )

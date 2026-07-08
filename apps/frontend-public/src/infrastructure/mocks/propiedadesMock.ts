@@ -1,4 +1,9 @@
 import { Propiedad } from '@/domain/entities/Propiedad'
+import { asesoresMock } from './asesoresMock'
+
+function asesorRef(id: string) {
+  return asesoresMock.find((a) => a.id === id) ?? null
+}
 
 export const propiedadesMock: Propiedad[] = [
   {
@@ -14,6 +19,7 @@ export const propiedadesMock: Propiedad[] = [
     destacada: true,
     publicada: true,
     asesorId: '1',
+    asesor: asesorRef('1')!,
     ubicacion: {
       direccion: 'Calle Principal 123',
       ciudad: 'Guayaquil',
@@ -39,6 +45,7 @@ export const propiedadesMock: Propiedad[] = [
     destacada: true,
     publicada: true,
     asesorId: '1',
+    asesor: asesorRef('1')!,
     ubicacion: {
       direccion: 'Calle 9 de Octubre 456',
       ciudad: 'Guayaquil',
@@ -64,6 +71,7 @@ export const propiedadesMock: Propiedad[] = [
     destacada: true,
     publicada: true,
     asesorId: '2',
+    asesor: asesorRef('2')!,
     ubicacion: {
       direccion: 'Km 8 Vía a Samborondón',
       ciudad: 'Samborondón',
@@ -89,6 +97,7 @@ export const propiedadesMock: Propiedad[] = [
     destacada: false,
     publicada: true,
     asesorId: '2',
+    asesor: asesorRef('2')!,
     ubicacion: {
       direccion: 'Malecón Simón Bolívar 789',
       ciudad: 'Guayaquil',
@@ -114,6 +123,7 @@ export const propiedadesMock: Propiedad[] = [
     destacada: false,
     publicada: true,
     asesorId: '1',
+    asesor: asesorRef('1')!,
     ubicacion: {
       direccion: 'Calle Las Garzas Mz 45',
       ciudad: 'Guayaquil',
@@ -136,6 +146,7 @@ export const propiedadesMock: Propiedad[] = [
     destacada: true,
     publicada: true,
     asesorId: '2',
+    asesor: asesorRef('2')!,
     ubicacion: {
       direccion: 'Calle 3ra, Kennedy Norte',
       ciudad: 'Guayaquil',
@@ -161,6 +172,7 @@ export const propiedadesMock: Propiedad[] = [
     destacada: false,
     publicada: true,
     asesorId: '1',
+    asesor: asesorRef('1')!,
     ubicacion: {
       direccion: 'Via a la Costa Km 5',
       ciudad: 'Guayaquil',
@@ -186,6 +198,7 @@ export const propiedadesMock: Propiedad[] = [
     destacada: false,
     publicada: true,
     asesorId: '2',
+    asesor: asesorRef('2')!,
     ubicacion: {
       direccion: 'Calle Los Lirios 123',
       ciudad: 'Guayaquil',
