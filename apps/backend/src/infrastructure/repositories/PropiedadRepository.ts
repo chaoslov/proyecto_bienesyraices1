@@ -1,13 +1,11 @@
 import prisma from '../database/prisma'
 import { IPropiedadRepository } from '../../domain/ports/IPropiedadRepository'
-import { CreateImagenData } from '../../domain/entities/Imagen'
 
 export class PropiedadRepository implements IPropiedadRepository {
-  async findAll(filtros = {}) {
+  async findAll(filtros: Record<string, unknown> = {}) {
     const { precioMin, precioMax, tipoPropiedad, tipoTransaccion, habitaciones, banios, parqueos,
-      sector, ciudad, ubicacion, asesorId, estado, busqueda, destacada,
+      sector, ciudad, asesorId, estado, busqueda, destacada,
       metrajeMin, metrajeMax, ordenarPor, ordenDireccion, page = 1, limit = 20 } = filtros as any
-
 
     const where: any = {}
 
@@ -21,10 +19,11 @@ export class PropiedadRepository implements IPropiedadRepository {
     if (habitaciones) where.habitaciones = habitaciones
     if (banios) where.banios = banios
     if (parqueos) where.parqueos = parqueos
-    if (asesorId) {
-      where.asesorId = asesorId
-    } else {
-      where.estado = estado || 'activa'
+    if (asesorId) where.asesorId = asesorId
+    if (estado) {
+      where.estado = estado
+    } else if (!asesorId) {
+      where.estado = 'activa'
     }
     if (destacada) where.destacada = true
 
@@ -101,7 +100,7 @@ export class PropiedadRepository implements IPropiedadRepository {
         ...propiedadData,
         asesor: { connect: { id: asesorId } },
         ubicacion: { create: ubicacion },
-        ...(imagenes ? { imagenes: { create: imagenes as CreateImagenData[] } } : {}),
+        ...(imagenes ? { imagenes: { create: imagenes } } : {}),
       },
       include: { imagenes: true, ubicacion: true, asesor: { select: { id: true, nombre: true, telefono: true } } },
     })
@@ -114,7 +113,7 @@ export class PropiedadRepository implements IPropiedadRepository {
       data: {
         ...propiedadData,
         ...(ubicacion ? { ubicacion: { update: ubicacion } } : {}),
-        ...(imagenes ? { imagenes: { deleteMany: {}, create: imagenes as CreateImagenData[] } } : {}),
+        ...(imagenes ? { imagenes: { deleteMany: {}, create: imagenes } } : {}),
       },
       include: { imagenes: true, ubicacion: true, asesor: { select: { id: true, nombre: true, telefono: true } } },
     })

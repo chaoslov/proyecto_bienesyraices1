@@ -10,4 +10,5 @@ export interface Asesor {
   experiencia: number
   creadoEn: Date
   propiedadesCount?: number
+  rol?: string
 }

@@ -1,11 +1,15 @@
 import { IImagenRepository } from '../../domain/ports/IImagenRepository'
-import { uploadToCloudinary, destroyFromCloudinary } from '../../infrastructure/cloudinary/upload'
+import { IFileUploadService } from '../../domain/ports/IFileUploadService'
+import { AppError } from './AppError'
 
 export class ImagenService {
-  constructor(private repository: IImagenRepository) {}
+  constructor(
+    private repository: IImagenRepository,
+    private fileUploadService: IFileUploadService,
+  ) {}
 
   async subir(propiedadId: string, file: Express.Multer.File) {
-    const result = await uploadToCloudinary(file)
+    const result = await this.fileUploadService.upload(file)
     const ultima = await this.repository.findAllByPropiedadId(propiedadId)
     const orden = ultima.length
 
@@ -18,7 +22,7 @@ export class ImagenService {
   }
 
   async subirMultiples(propiedadId: string, files: Express.Multer.File[]) {
-    const results = await Promise.all(files.map(f => uploadToCloudinary(f)))
+    const results = await Promise.all(files.map(f => this.fileUploadService.upload(f)))
     const existentes = await this.repository.findAllByPropiedadId(propiedadId)
 
     const data = results.map((r, i) => ({
@@ -34,9 +38,9 @@ export class ImagenService {
 
   async eliminar(id: string) {
     const imagen = await this.repository.findById(id)
-    if (!imagen) throw { status: 404, message: 'Imagen no encontrada' }
+    if (!imagen) throw new AppError(404, 'Imagen no encontrada')
 
-    await destroyFromCloudinary(imagen.publicId)
+    await this.fileUploadService.destroy(imagen.publicId)
     await this.repository.delete(id)
   }
 
@@ -44,7 +48,7 @@ export class ImagenService {
     const imagenes = await this.repository.findAllByPropiedadId(propiedadId)
     if (imagenes.length === 0) return
 
-    await Promise.all(imagenes.map(img => destroyFromCloudinary(img.publicId)))
+    await Promise.all(imagenes.map(img => this.fileUploadService.destroy(img.publicId)))
     await Promise.all(imagenes.map(img => this.repository.delete(img.id)))
   }
 }

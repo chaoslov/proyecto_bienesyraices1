@@ -9,7 +9,11 @@ export interface Filtros {
   precioMin?: number
   precioMax?: number
   habitaciones?: number
+  banos?: number
+  areaMin?: number
+  areaMax?: number
   ciudad?: string
+  sector?: string
   busqueda?: string
 }
 
@@ -57,6 +61,14 @@ export const usePropiedadStore = create<PropiedadState>((set, get) => ({
         return false
       if (filtros.ciudad && prop.ubicacion.ciudad !== filtros.ciudad)
         return false
+      if (filtros.sector && prop.ubicacion.sector !== filtros.sector)
+        return false
+      if (filtros.banos && prop.banos < filtros.banos)
+        return false
+      if (filtros.areaMin && prop.areaTotal < filtros.areaMin)
+        return false
+      if (filtros.areaMax && prop.areaTotal > filtros.areaMax)
+        return false
       if (filtros.busqueda) {
         const term = filtros.busqueda.toLowerCase()
         const titulo = prop.titulo.toLowerCase()
@@ -71,18 +83,36 @@ export const usePropiedadStore = create<PropiedadState>((set, get) => ({
 
   fetchPropiedades: async (page = 1) => {
     set({ loading: true, error: null })
+    const LIMIT = 12
     try {
       const { filtros } = get()
-      const result = await PropiedadApi.listar(filtros, page)
+      const result = await PropiedadApi.listar(filtros, 1, 100)
+      set({ propiedades: result.data, total: result.total, page: result.page, loading: false })
+      const todasFiltradas = get().aplicarFiltros()
+      const totalFiltradas = todasFiltradas.length
+      const totalPages = Math.ceil(totalFiltradas / LIMIT) || 1
+      const safePage = Math.min(page, totalPages)
+      const start = (safePage - 1) * LIMIT
       set({
-        propiedades: result.data,
-        total: result.total,
-        page: result.page,
+        propiedades: todasFiltradas.slice(start, start + LIMIT),
+        total: totalFiltradas,
+        page: safePage,
         loading: false,
       })
     } catch (err: any) {
       const mocks = propiedadesMock.filter((p) => p.publicada)
-      set({ propiedades: mocks, total: mocks.length, loading: false, error: err?.message || 'Error al cargar' })
+      set({ propiedades: mocks, total: mocks.length, loading: false })
+      const todasFiltradas = get().aplicarFiltros()
+      const totalFiltradas = todasFiltradas.length
+      const totalPages = Math.ceil(totalFiltradas / LIMIT) || 1
+      const safePage = Math.min(page, totalPages)
+      const start = (safePage - 1) * LIMIT
+      set({
+        propiedades: todasFiltradas.slice(start, start + LIMIT),
+        total: totalFiltradas,
+        page: safePage,
+        loading: false,
+      })
     }
   },
 

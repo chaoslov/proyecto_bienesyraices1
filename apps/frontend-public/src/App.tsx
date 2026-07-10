@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { LayoutPublico } from './presentation/components/layout/LayoutPublico'
 import { LayoutPrivado } from './presentation/components/layout/LayoutPrivado'
+import { AdminLayout } from './presentation/components/layout/AdminLayout'
 import { PrivateRoute } from './presentation/components/auth/PrivateRoute'
 import { useAuthStore } from './application/store/authStore'
 import { PrincipalPage } from './presentation/pages/public/PrincipalPage'
@@ -18,6 +19,8 @@ import { EditarPropiedadPage } from './presentation/pages/private/EditarPropieda
 import { MensajesPage } from './presentation/pages/private/MensajesPage'
 import { PerfilPage } from './presentation/pages/private/PerfilPage'
 import { ServicioVentaPage } from './presentation/pages/public/ServicioVentaPage'
+import { AdminAsesoresPage } from './presentation/pages/private/AdminAsesoresPage'
+import { AdminMensajesPage } from './presentation/pages/private/AdminMensajesPage'
 
 function App() {
   const { token, checkAuth } = useAuthStore()
@@ -46,6 +49,10 @@ function App() {
             <Route path="propiedades/editar/:id" element={<EditarPropiedadPage />} />
             <Route path="mensajes" element={<MensajesPage />} />
             <Route path="perfil" element={<PerfilPage />} />
+          </Route>
+          <Route element={<AdminLayout />}>
+            <Route path="admin/asesores" element={<AdminAsesoresPage />} />
+            <Route path="admin/mensajes" element={<AdminMensajesPage />} />
           </Route>
         </Route>
         <Route path="*" element={<NotFoundPage />} />

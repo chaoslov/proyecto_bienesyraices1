@@ -1,6 +1,6 @@
 import { Asesor } from '@/domain/entities/Asesor'
 
-export function mapAsesorDesdeAPI(raw: any): Asesor {
+export function mapAsesorFromAPI(raw: any): Asesor {
   return {
     id: raw.id,
     nombre: raw.nombre,
@@ -11,10 +11,12 @@ export function mapAsesorDesdeAPI(raw: any): Asesor {
     especialidad: raw.especialidad ?? '',
     experiencia: raw.añosExperiencia ?? 0,
     creadoEn: new Date(raw.createdAt),
+    descripcion: raw.descripcion ?? '',
     propiedadesCount: raw._count?.propiedades ?? 0,
+    rol: raw.user?.rol,
   }
 }
 
 export function mapAsesoresLista(rawData: any[]): Asesor[] {
-  return rawData.map(mapAsesorDesdeAPI)
+  return rawData.map(mapAsesorFromAPI)
 }

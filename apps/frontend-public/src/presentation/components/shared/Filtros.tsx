@@ -15,7 +15,7 @@ export const Filtros = () => {
 
   return (
     <div className="bg-[#E8D9C8] p-4 rounded-lg shadow-md mb-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <div>
           <Input
             label="Buscar"
@@ -55,6 +55,48 @@ export const Filtros = () => {
             placeholder="$999,999"
             value={filtros.precioMax || ''}
             onChange={(e) => setFiltros({ precioMax: e.target.value ? Number(e.target.value) : undefined })}
+          />
+        </div>
+
+        <div>
+          <Input
+            label="Habitaciones mín."
+            type="number"
+            placeholder="0"
+            value={filtros.habitaciones || ''}
+            onChange={(e) => setFiltros({ habitaciones: e.target.value ? Number(e.target.value) : undefined })}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
+        <div>
+          <Input
+            label="Baños mín."
+            type="number"
+            placeholder="0"
+            value={filtros.banos || ''}
+            onChange={(e) => setFiltros({ banos: e.target.value ? Number(e.target.value) : undefined })}
+          />
+        </div>
+
+        <div>
+          <Input
+            label="Área mín. (m²)"
+            type="number"
+            placeholder="0"
+            value={filtros.areaMin || ''}
+            onChange={(e) => setFiltros({ areaMin: e.target.value ? Number(e.target.value) : undefined })}
+          />
+        </div>
+
+        <div>
+          <Input
+            label="Área máx. (m²)"
+            type="number"
+            placeholder="0"
+            value={filtros.areaMax || ''}
+            onChange={(e) => setFiltros({ areaMax: e.target.value ? Number(e.target.value) : undefined })}
           />
         </div>
       </div>

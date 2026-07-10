@@ -1,10 +1,39 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { PropiedadApi } from '@/infrastructure/api/repositories/PropiedadApiRepository'
 import type { Propiedad } from '@/domain/entities/Propiedad'
 import { crearIconoMarcador } from './IconosMarcador'
 import { PopupPropiedad } from './PopupPropiedad'
+
+const MapSync = ({ selectedId, propiedades, markersRef }: { selectedId?: string | null; propiedades: Propiedad[]; markersRef: Record<string, any> }) => {
+  const map = useMap()
+  const last = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (!selectedId) return
+    if (last.current === selectedId) return
+    last.current = selectedId
+    const prop = propiedades.find((p) => p.id === selectedId)
+    if (!prop) return
+    const marker = markersRef?.[selectedId]
+    const latlng: any = [prop.ubicacion.latitud, prop.ubicacion.longitud]
+    try {
+      map.setView(latlng, Math.max(map.getZoom(), 13), { animate: true })
+      if (marker && marker.openPopup) {
+        const instance = marker?.current ?? marker
+        instance?.openPopup()
+      } else {
+        const L = require('leaflet')
+        const popup = L.popup({ maxWidth: 300 }).setLatLng(latlng).setContent(prop.titulo)
+        popup.openOn(map)
+      }
+    } catch (err) {
+    }
+  }, [selectedId, propiedades, markersRef, map])
+
+  return null
+}
 
 const MapaControles = () => {
   const map = useMap()
@@ -14,10 +43,11 @@ const MapaControles = () => {
   return null
 }
 
-export const MapaPropiedades = ({ altura = '500px' }: { altura?: string }) => {
+export const MapaPropiedades = ({ altura = '500px', selectedId }: { altura?: string; selectedId?: string | null }) => {
   const [propiedades, setPropiedades] = useState<Propiedad[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
+  const markersRef = useRef<Record<string, any>>({})
 
   useEffect(() => {
     PropiedadApi.listar({}, 1, 50).then((res) => {
@@ -68,12 +98,19 @@ export const MapaPropiedades = ({ altura = '500px' }: { altura?: string }) => {
           />
 
           {propiedades.map((prop) => (
-            <Marker key={prop.id} position={[prop.ubicacion.latitud, prop.ubicacion.longitud]} icon={crearIconoMarcador(prop.tipoTransaccion)} title={prop.titulo}>
+            <Marker
+              key={prop.id}
+              ref={(r) => { if (r) markersRef.current[prop.id] = r }}
+              position={[prop.ubicacion.latitud, prop.ubicacion.longitud]}
+              icon={crearIconoMarcador(prop.tipoTransaccion)}
+              title={prop.titulo}
+            >
               <Popup maxWidth={250} minWidth={200}>
                 <PopupPropiedad propiedad={prop} />
               </Popup>
             </Marker>
         ))}
+          <MapSync selectedId={selectedId} propiedades={propiedades} markersRef={markersRef.current} />
       </MapContainer>
 
       {!cargando && !error && propiedades.length > 0 && (

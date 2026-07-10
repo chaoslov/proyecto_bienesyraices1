@@ -1,12 +1,13 @@
 import { useRef, type KeyboardEvent, type ChangeEvent } from 'react'
 import { Send } from 'lucide-react'
-import { selectPuedeEscribir, useChatbotStore } from '@/application/store/chatbotStore'
+import { useChatbotStore } from '@/application/store/chatbotStore' // 👈 Quitamos selectPuedeEscribir de aquí
 
-interface Props { onEnviar: (texto: string) => void }
+interface Props { onEnviar: (texto: string) => void; placeholder?: string; }
 
 export const ChatInput = ({ onEnviar }: Props) => {
+  
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const puedeEscribir = useChatbotStore(selectPuedeEscribir)
+  const puedeEscribir = useChatbotStore((state) => state.estado === 'idle')
 
   const handleEnviar = () => {
     const texto = textareaRef.current?.value.trim() ?? ''
@@ -41,8 +42,8 @@ export const ChatInput = ({ onEnviar }: Props) => {
         onKeyDown={handleKeyDown}
         placeholder={puedeEscribir ? 'Ej: casas en venta en Urdesa...' : 'Procesando...'}
         className="flex-1 resize-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2
-                   text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2
-                   focus:ring-[#C47B4A] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2
+                  focus:ring-[#C47B4A] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         style={{ minHeight: '38px' }}
       />
       <button
@@ -50,8 +51,8 @@ export const ChatInput = ({ onEnviar }: Props) => {
         disabled={!puedeEscribir}
         aria-label="Enviar mensaje"
         className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#2C3E50] text-white flex items-center
-                   justify-center hover:bg-[#1a2a3a] active:scale-95 disabled:opacity-40
-                   disabled:cursor-not-allowed transition-all"
+                  justify-center hover:bg-[#1a2a3a] active:scale-95 disabled:opacity-40
+                  disabled:cursor-not-allowed transition-all"
       >
         <Send size={16} />
       </button>

@@ -52,6 +52,18 @@ model User {
   updatedAt DateTime @updatedAt
 
   asesor Asesor?
+  admin  Admin?
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  nombre    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user            User      @relation(fields: [userId], references: [id])
+  mensajesAsignados Mensaje[] @relation("AdminAsignador")
 }
 
 model Asesor {
@@ -127,11 +139,15 @@ model Mensaje {
   tipo         TipoMensaje
   leido        Boolean       @default(false)
   archivado    Boolean       @default(false)
-  propiedadId  String?
-  asesorId     String
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  propiedadId     String?
+  asesorId        String
+  asignadoPor     String?
+  estadoAsignacion String?
 
-  propiedad Propiedad? @relation(fields: [propiedadId], references: [id])
-  asesor    Asesor     @relation(fields: [asesorId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  propiedad       Propiedad?    @relation(fields: [propiedadId], references: [id])
+  asesor          Asesor        @relation(fields: [asesorId], references: [id])
+  adminAsignador  Admin?        @relation("AdminAsignador", fields: [asignadoPor], references: [id])
 }

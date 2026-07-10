@@ -3,8 +3,8 @@ import { z } from 'zod'
 export const createAsesorSchema = z.object({
   nombre: z.string().min(1, 'Nombre requerido').max(100),
   email: z.string().email('Email inválido'),
-  password: z.string().min(8, 'Mínimo 8 caracteres'),
-  telefono: z.string().min(1, 'Teléfono requerido'),
+  password: z.string().min(6, 'Mínimo 6 caracteres'),
+  telefono: z.string().optional(),
   foto: z.string().url('URL inválida').optional(),
   especialidad: z.string().optional(),
   descripcion: z.string().optional(),
@@ -14,6 +14,8 @@ export const createAsesorSchema = z.object({
 
 export const updateAsesorSchema = z.object({
   nombre: z.string().min(1).max(100).optional(),
+  email: z.string().email('Email inválido').optional(),
+  password: z.string().min(6, 'Mínimo 6 caracteres').optional(),
   telefono: z.string().min(1).optional(),
   foto: z.string().url('URL inválida').optional(),
   especialidad: z.string().optional(),

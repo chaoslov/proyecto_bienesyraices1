@@ -1,5 +1,6 @@
 export interface Ubicacion {
   direccion: string
+  sector?: string
   ciudad: string
   latitud: number
   longitud: number

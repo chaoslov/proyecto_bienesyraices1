@@ -1,14 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
-import jwt from 'jsonwebtoken'
+import { JwtTokenService } from '../auth/JwtTokenService'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-in-production'
-
-export interface TokenPayload {
-  id: string
-  email: string
-  rol: string
-  asesorId: string | null
-}
+const tokenService = new JwtTokenService()
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization
@@ -20,18 +13,16 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const token = header.split(' ')[1]
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload
-    ;(req as any).user = decoded
+    req.user = tokenService.verify(token)
     next()
-  } catch (error) {
+  } catch {
     return res.status(401).json({ message: 'Token inválido o expirado' })
   }
 }
 
 export function requireRol(...roles: string[]) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const user = (req as any).user as TokenPayload
-    if (!user || !roles.includes(user.rol)) {
+    if (!req.user || !roles.includes(req.user.rol)) {
       return res.status(403).json({ message: 'No tienes permisos para esta acción' })
     }
     next()
@@ -39,9 +30,15 @@ export function requireRol(...roles: string[]) {
 }
 
 export function getAsesorId(req: Request): string {
-  const user = (req as any).user as TokenPayload
-  if (!user?.asesorId) {
+  if (!req.user?.asesorId) {
     throw { status: 403, message: 'Acción solo para asesores' }
   }
-  return user.asesorId
+  return req.user.asesorId
+}
+
+export function getAdminId(req: Request): string {
+  if (!req.user?.adminId) {
+    throw { status: 403, message: 'Acción solo para administradores' }
+  }
+  return req.user.adminId
 }

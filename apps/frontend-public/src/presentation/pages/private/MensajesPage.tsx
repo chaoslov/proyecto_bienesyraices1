@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/application/store/authStore'
 import { MensajeApi, MensajeFromAPI } from '@/infrastructure/api/repositories/MensajeApiRepository'
-import { Mail, Check, Trash2, Archive } from 'lucide-react'
+import { Mail, Check, Trash2, CheckCircle, XCircle } from 'lucide-react'
 
 type Filtro = 'todos' | 'no_leidos' | 'leidos'
 
@@ -36,13 +36,6 @@ export const MensajesPage = () => {
     } catch { alert('Error al marcar como leído') }
   }
 
-  const archivar = async (id: string) => {
-    try {
-      await MensajeApi.archivar(id)
-      cargar()
-    } catch { alert('Error al archivar') }
-  }
-
   const eliminarMensaje = async (id: string) => {
     if (!confirm('¿Eliminar este mensaje?')) return
     try {
@@ -51,12 +44,34 @@ export const MensajesPage = () => {
     } catch { alert('Error al eliminar') }
   }
 
+  const aceptarAsignacion = async (id: string) => {
+    try {
+      await MensajeApi.aceptar(id)
+      cargar()
+    } catch { alert('Error al aceptar asignación') }
+  }
+
+  const rechazarAsignacion = async (id: string) => {
+    try {
+      await MensajeApi.rechazar(id)
+      cargar()
+    } catch { alert('Error al rechazar asignación') }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin h-8 w-8 border-4 border-[#2C3E50] border-t-transparent rounded-full" />
       </div>
     )
+  }
+
+  const getBorderClass = (msg: MensajeFromAPI) => {
+    if (msg.estadoAsignacion === 'pendiente' || msg.estadoAsignacion === 'aceptado') {
+      return 'border-l-4 border-green-500'
+    }
+    if (!msg.leido) return 'border-l-4 border-[#C47B4A]'
+    return ''
   }
 
   return (
@@ -95,9 +110,7 @@ export const MensajesPage = () => {
           {filtrados.map((msg) => (
             <div
               key={msg.id}
-              className={`bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow ${
-                !msg.leido ? 'border-l-4 border-[#C47B4A]' : ''
-              }`}
+              className={`bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow ${getBorderClass(msg)}`}
             >
               <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
                 <div className="flex-1 min-w-0 w-full">
@@ -105,7 +118,17 @@ export const MensajesPage = () => {
                     <h3 className="font-semibold text-gray-800 text-sm sm:text-base break-words">
                       {msg.nombre}
                     </h3>
-                    {!msg.leido && (
+                    {msg.estadoAsignacion === 'pendiente' && (
+                      <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
+                        Asignado
+                      </span>
+                    )}
+                    {msg.estadoAsignacion === 'aceptado' && (
+                      <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
+                        Aceptado
+                      </span>
+                    )}
+                    {!msg.leido && msg.estadoAsignacion === null && (
                       <span className="bg-[#C47B4A]/10 text-[#C47B4A] text-xs px-2 py-0.5 rounded-full flex-shrink-0">
                         Nuevo
                       </span>
@@ -129,7 +152,25 @@ export const MensajesPage = () => {
                   </p>
                 </div>
                 <div className="flex gap-2 flex-shrink-0 self-end sm:self-start">
-                  {!msg.leido && (
+                  {msg.estadoAsignacion === 'pendiente' && (
+                    <>
+                      <button
+                        onClick={() => aceptarAsignacion(msg.id)}
+                        className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        title="Aceptar asignación"
+                      >
+                        <CheckCircle className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => rechazarAsignacion(msg.id)}
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Rechazar asignación"
+                      >
+                        <XCircle className="w-5 h-5" />
+                      </button>
+                    </>
+                  )}
+                  {!msg.leido && msg.estadoAsignacion === null && (
                     <button
                       onClick={() => marcarComoLeido(msg.id)}
                       className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
@@ -138,13 +179,6 @@ export const MensajesPage = () => {
                       <Check className="w-4 h-4" />
                     </button>
                   )}
-                  <button
-                    onClick={() => archivar(msg.id)}
-                    className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                    title="Archivar"
-                  >
-                    <Archive className="w-4 h-4" />
-                  </button>
                   <button
                     onClick={() => eliminarMensaje(msg.id)}
                     className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"

@@ -5,6 +5,7 @@ export interface IMensajeRepository {
     leido?: boolean
     archivado?: boolean
   }): Promise<any[]>
+  findAllAdmin(filtros?: { tipo?: string; leido?: boolean; archivado?: boolean }): Promise<any[]>
   findById(id: string): Promise<any | null>
   create(data: CreateMensajeData): Promise<any>
   update(id: string, data: UpdateMensajeData): Promise<any>

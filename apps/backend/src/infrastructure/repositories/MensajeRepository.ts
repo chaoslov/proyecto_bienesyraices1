@@ -13,6 +13,26 @@ export class MensajeRepository implements IMensajeRepository {
     })
   }
 
+  async findAllAdmin(filtros?: { tipo?: string; leido?: boolean; archivado?: boolean }) {
+    const where: any = {
+      OR: [
+        { estadoAsignacion: null },
+        { estadoAsignacion: 'rechazado' },
+      ],
+    }
+    if (filtros?.tipo !== undefined) where.tipo = filtros.tipo
+    if (filtros?.leido !== undefined) where.leido = filtros.leido
+    if (filtros?.archivado !== undefined) where.archivado = filtros.archivado
+    return prisma.mensaje.findMany({
+      where,
+      include: {
+        propiedad: { select: { id: true, titulo: true } },
+        asesor: { select: { id: true, nombre: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+  }
+
   async findById(id: string) {
     return prisma.mensaje.findUnique({
       where: { id },

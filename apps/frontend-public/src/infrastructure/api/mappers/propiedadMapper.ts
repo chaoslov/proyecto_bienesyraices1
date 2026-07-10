@@ -16,6 +16,7 @@ export function mapPropiedadDesdeAPI(raw: any): Propiedad {
     asesorId: raw.asesorId,
     ubicacion: {
       direccion: raw.ubicacion?.direccion ?? '',
+      sector: raw.ubicacion?.sector ?? undefined,
       ciudad: raw.ubicacion?.ciudad ?? '',
       latitud: raw.ubicacion?.latitud ?? 0,
       longitud: raw.ubicacion?.longitud ?? 0,
@@ -42,6 +43,7 @@ export function mapFiltrosParaAPI(filtros: Record<string, any>): Record<string, 
   if (filtros.precioMax) params.precioMax = filtros.precioMax
   if (filtros.habitaciones) params.habitaciones = filtros.habitaciones
   if (filtros.ciudad) params.ciudad = filtros.ciudad
+  if (filtros.sector) params.sector = filtros.sector
   if (filtros.busqueda) params.busqueda = filtros.busqueda
   if (filtros.asesorId) params.asesorId = filtros.asesorId
   return params

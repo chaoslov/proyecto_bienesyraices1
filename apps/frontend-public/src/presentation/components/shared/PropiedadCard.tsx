@@ -5,6 +5,7 @@ import { Button } from '@/presentation/components/ui/Botones'
 interface PropiedadCardProps {
   propiedad: Propiedad
   showActions?: boolean
+  onSelect?: (id: string) => void
 }
 
 function BedIcon() {
@@ -31,7 +32,7 @@ function AreaIcon() {
   )
 }
 
-export const PropiedadCard = ({ propiedad, showActions = false }: PropiedadCardProps) => {
+export const PropiedadCard = ({ propiedad, showActions = false, onSelect }: PropiedadCardProps) => {
   const formatearPrecio = (precio: number) => {
     return new Intl.NumberFormat('es-EC', {
       style: 'currency',
@@ -41,7 +42,7 @@ export const PropiedadCard = ({ propiedad, showActions = false }: PropiedadCardP
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
+    <div onClick={() => onSelect?.(propiedad.id)} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col cursor-pointer">
       <div className="relative h-48 overflow-hidden bg-gray-200">
         <img
           src={propiedad.imagenes[0] || 'https://picsum.photos/seed/default/400/300'}
@@ -91,7 +92,7 @@ export const PropiedadCard = ({ propiedad, showActions = false }: PropiedadCardP
         )}
 
         <div className="flex gap-2 mt-4 pt-3 border-t border-gray-100">
-          <Link to={`/propiedad/${propiedad.id}`} className="flex-1">
+          <Link to={`/propiedad/${propiedad.id}`} className="flex-1" onClick={(e) => e.stopPropagation()}>
             <Button variant="primary" size="pq" className="w-full">
               Ver Detalle
             </Button>

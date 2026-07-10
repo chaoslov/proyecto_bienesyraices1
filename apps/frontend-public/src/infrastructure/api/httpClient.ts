@@ -30,6 +30,10 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     },
   })
 
+  if (res.status === 204) {
+    return null as T
+  }
+
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: 'Error de conexión' }))
     throw { status: res.status, ...error }
@@ -63,6 +67,9 @@ export const api = {
       },
       body: formData,
     }).then(async (res) => {
+      if (res.status === 204) {
+        return null as T
+      }
       if (!res.ok) {
         const error = await res.json().catch(() => ({ message: 'Error de conexión' }))
         throw { status: res.status, ...error }

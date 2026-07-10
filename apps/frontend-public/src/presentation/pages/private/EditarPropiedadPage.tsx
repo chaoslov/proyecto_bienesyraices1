@@ -1,5 +1,6 @@
 import { useEffect, useState, FormEvent, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { PROVINCIAS_ECUADOR } from '@/shared/constants/ecuador'
 import { PropiedadApi } from '@/infrastructure/api/repositories/PropiedadApiRepository'
 import { uploadService } from '@/infrastructure/upload/uploadService'
 import { MapaSelector } from '@/presentation/components/map/MapaSelector'
@@ -23,7 +24,7 @@ export const EditarPropiedadPage = () => {
     titulo: '', descripcion: '', precio: '', tipoPropiedad: 'casa',
     tipoTransaccion: 'venta', habitaciones: '', banos: '', parqueos: '',
     areaTotal: '', metrajeConstruido: '',
-    direccion: '', sector: '', ciudad: 'Guayaquil',
+    direccion: '', sector: '', ciudad: 'Guayaquil', provincia: 'Guayas',
     latitud: 0, longitud: 0,
     archivos: [] as File[],
     imagenesExistentes: [] as ImagenInfo[],
@@ -48,6 +49,7 @@ export const EditarPropiedadPage = () => {
         direccion: p.ubicacion?.direccion || '',
         sector: p.ubicacion?.sector || '',
         ciudad: p.ubicacion?.ciudad || 'Guayaquil',
+        provincia: p.ubicacion?.provincia || 'Guayas',
         latitud: p.ubicacion?.latitud || 0,
         longitud: p.ubicacion?.longitud || 0,
         archivos: [],
@@ -84,6 +86,7 @@ export const EditarPropiedadPage = () => {
           direccion: form.direccion,
           sector: form.sector,
           ciudad: form.ciudad,
+          provincia: form.provincia,
           latitud: form.latitud || 0,
           longitud: form.longitud || 0,
         },
@@ -238,6 +241,14 @@ export const EditarPropiedadPage = () => {
                 <div>
                   <label className={labelCls}>Ciudad</label>
                   <input className={inputCls} value={form.ciudad} onChange={(e) => setForm({ ...form, ciudad: e.target.value })} />
+                </div>
+                <div>
+                  <label className={labelCls}>Provincia</label>
+                  <select className={inputCls} value={form.provincia} onChange={(e) => setForm({ ...form, provincia: e.target.value })}>
+                    {PROVINCIAS_ECUADOR.map((p) => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>

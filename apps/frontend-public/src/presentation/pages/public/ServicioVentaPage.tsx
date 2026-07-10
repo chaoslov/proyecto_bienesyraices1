@@ -1,14 +1,58 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { MensajeApi } from '@/infrastructure/api/repositories/MensajeApiRepository'
+import { AsesorApi } from '@/infrastructure/api/repositories/AsesorApiRepository'
 
 export const ServicioVentaPage = () => {
   const [form, setForm] = useState({
     nombre: '', apellido: '', email: '', telefono: '', ciudad: '', tipoPropiedad: '',
   })
   const [enviado, setEnviado] = useState(false)
+  const [enviando, setEnviando] = useState(false)
+  const [adminAsesorId, setAdminAsesorId] = useState<string | null>(null)
+  const [errorAsesor, setErrorAsesor] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    AsesorApi.listar()
+      .then((asesores) => {
+        if (asesores.length > 0) {
+          setAdminAsesorId(asesores[0].id)
+          return
+        }
+        setErrorAsesor('No se encontró ningún asesor disponible para recibir la solicitud.')
+      })
+      .catch(() => {
+        setErrorAsesor('No se pudo cargar el destinatario de la solicitud. Intenta de nuevo más tarde.')
+      })
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setEnviado(true)
+    if (enviando) return
+    if (!adminAsesorId) {
+      setErrorAsesor('Aún no se puede procesar la solicitud. Intenta de nuevo en unos segundos.')
+      return
+    }
+
+    setEnviando(true)
+
+    try {
+      await MensajeApi.enviar({
+        nombre: `${form.nombre} ${form.apellido}`.trim(),
+        email: form.email,
+        telefono: form.telefono || undefined,
+        mensaje: `Solicitud de venta de propiedad:\nNombre: ${form.nombre} ${form.apellido}\nEmail: ${form.email}\nTeléfono: ${form.telefono}\nCiudad: ${form.ciudad}\nTipo de propiedad: ${form.tipoPropiedad}`,
+        tipo: 'venta',
+        asesorId: adminAsesorId,
+      })
+      setEnviado(true)
+      setForm({ nombre: '', apellido: '', email: '', telefono: '', ciudad: '', tipoPropiedad: '' })
+      setErrorAsesor(null)
+    } catch (error) {
+      const msg = (error as any)?.message || 'Error al enviar la solicitud. Intenta de nuevo más tarde.'
+      setErrorAsesor(msg)
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (
@@ -154,11 +198,17 @@ export const ServicioVentaPage = () => {
                     </div>
                   </div>
 
+                  {errorAsesor && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-3">
+                      {errorAsesor}
+                    </div>
+                  )}
                   <button
                     type="submit"
-                    className="w-full bg-[#C47B4A] hover:bg-[#A8663A] text-white font-bold py-4 px-6 rounded-xl mt-6 transition duration-300 shadow-lg flex justify-center items-center gap-2 text-lg"
+                    disabled={enviando || !adminAsesorId}
+                    className={`w-full ${enviando || !adminAsesorId ? 'bg-gray-300 hover:bg-gray-300 cursor-not-allowed' : 'bg-[#C47B4A] hover:bg-[#A8663A]'} text-white font-bold py-4 px-6 rounded-xl mt-6 transition duration-300 shadow-lg flex justify-center items-center gap-2 text-lg`}
                   >
-                    <span>Enviar solicitud</span>
+                    <span>{enviando ? 'Enviando...' : 'Enviar solicitud'}</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                     </svg>

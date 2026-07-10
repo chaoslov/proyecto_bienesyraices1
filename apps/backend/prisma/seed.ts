@@ -32,6 +32,10 @@ async function main() {
     data: { email: 'admin@alpha.com', password, rol: 'admin' },
   })
 
+  const admin = await prisma.admin.create({
+    data: { userId: adminUser.id, nombre: 'Administrador' },
+  })
+
   // Asesores
   const asesoresData = [
     { email: 'juan@alpha.com', nombre: 'Juan Pérez', telefono: '0991234567', especialidad: 'Ventas de lujo', experiencia: 8, foto: 'https://geobienes-files.nyc3.digitaloceanspaces.com/1776351466280.webp', descripcion: 'Especialista en propiedades de alta gama con más de 8 años en el mercado inmobiliario de Guayaquil.' },

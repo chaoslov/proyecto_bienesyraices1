@@ -22,6 +22,7 @@ export const propiedadesMock: Propiedad[] = [
     asesor: asesorRef('1')!,
     ubicacion: {
       direccion: 'Calle Principal 123',
+      sector: 'Urdesa',
       ciudad: 'Guayaquil',
       latitud: -2.203,
       longitud: -79.897,
@@ -48,6 +49,7 @@ export const propiedadesMock: Propiedad[] = [
     asesor: asesorRef('1')!,
     ubicacion: {
       direccion: 'Calle 9 de Octubre 456',
+      sector: 'Centro',
       ciudad: 'Guayaquil',
       latitud: -2.188,
       longitud: -79.883,
@@ -100,6 +102,7 @@ export const propiedadesMock: Propiedad[] = [
     asesor: asesorRef('2')!,
     ubicacion: {
       direccion: 'Malecón Simón Bolívar 789',
+      sector: 'Centro',
       ciudad: 'Guayaquil',
       latitud: -2.195,
       longitud: -79.886,
@@ -201,6 +204,7 @@ export const propiedadesMock: Propiedad[] = [
     asesor: asesorRef('2')!,
     ubicacion: {
       direccion: 'Calle Los Lirios 123',
+      sector: 'Las Vegas',
       ciudad: 'Guayaquil',
       latitud: -2.280,
       longitud: -79.890,

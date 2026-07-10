@@ -24,7 +24,7 @@ export const crearIconoMarcador = (tipoTransaccion: 'venta' | 'alquiler'): L.Div
   const color = COLORS[tipoTransaccion]
   return L.divIcon({
     html: crearSVGIcono(color),
-    className: '',
+    className: 'custom-marker-icon',
     iconSize: [32, 42],
     iconAnchor: [16, 42],
     popupAnchor: [0, -42],

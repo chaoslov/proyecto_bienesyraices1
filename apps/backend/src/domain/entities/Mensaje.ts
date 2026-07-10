@@ -9,6 +9,8 @@ export interface MensajeEntity {
   archivado: boolean
   propiedadId: string | null
   asesorId: string
+  asignadoPor: string | null
+  estadoAsignacion: string | null
   createdAt: Date
   updatedAt: Date
 }
@@ -26,4 +28,7 @@ export interface CreateMensajeData {
 export interface UpdateMensajeData {
   leido?: boolean
   archivado?: boolean
+  asesorId?: string
+  asignadoPor?: string | null
+  estadoAsignacion?: string | null
 }

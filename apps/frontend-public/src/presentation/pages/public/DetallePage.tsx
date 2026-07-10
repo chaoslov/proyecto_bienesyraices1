@@ -6,6 +6,7 @@ import { PropiedadCard } from '@/presentation/components/shared/PropiedadCard'
 import { PropiedadApi } from '@/infrastructure/api/repositories/PropiedadApiRepository'
 import { MensajeApi } from '@/infrastructure/api/repositories/MensajeApiRepository'
 import { useAsesorStore } from '@/application/store/asesorStore'
+import buildWhatsAppLink from '@/shared/utils/whatsapp'
 
 function BedIcon() {
   return (
@@ -99,7 +100,8 @@ export const DetallePage = () => {
       setEnvioExitoso(true)
       setFormData({ nombre: '', email: '', telefono: '', mensaje: '' })
     } catch (err) {
-      alert('Error al enviar el mensaje. Intenta de nuevo.')
+      const msg = (err as any)?.message || 'Error al enviar el mensaje. Intenta de nuevo.'
+      alert(msg)
     } finally {
       setEnviando(false)
     }
@@ -260,15 +262,25 @@ export const DetallePage = () => {
               </p>
               <div className="flex justify-center gap-3 mt-4">
                 <a
-                  href={`mailto:${asesor.email || ''}`}
+                  href={(() => {
+                    const to = asesor.email || ''
+                    const subject = `Consulta por: ${propiedad.titulo}`
+                    const body = `Hola ${asesor.nombre},%0D%0A%0D%0AEstoy interesado en la propiedad: ${propiedad.titulo}%0D%0ADirección: ${propiedad.ubicacion?.direccion || ''}%0D%0ACiudad: ${propiedad.ubicacion?.ciudad || ''}%0D%0A%0D%0ASaludos,%0D%0A`
+                    if (to) {
+                      return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(decodeURIComponent(body))}`
+                    }
+                    return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(decodeURIComponent(body))}`
+                  })()}
                   className="w-10 h-10 rounded-full bg-[#C47B4A]/10 flex items-center justify-center text-[#C47B4A] hover:bg-[#C47B4A] hover:text-white transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </a>
                 <a
-                  href={`https://wa.me/593${asesor.telefono?.replace(/^0/, '')}?text=${encodeURIComponent(`Hola ${asesor.nombre}, estoy interesado en: ${propiedad.titulo}`)}`}
+                  href={buildWhatsAppLink(asesor.telefono, `Hola ${asesor.nombre}, estoy interesado en: ${propiedad.titulo}`)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 hover:bg-green-600 hover:text-white transition-colors"
@@ -372,7 +384,7 @@ export const DetallePage = () => {
                 </svg>
               </a>
               <a
-                href={`https://wa.me/593${asesor.telefono?.replace(/^0/, '')}?text=${encodeURIComponent(`Hola ${asesor.nombre}, estoy interesado en: ${propiedad.titulo}`)}`}
+                href={buildWhatsAppLink(asesor.telefono, `Hola ${asesor.nombre}, estoy interesado en: ${propiedad.titulo}`)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"

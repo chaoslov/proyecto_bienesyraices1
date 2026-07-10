@@ -22,7 +22,12 @@ export const LoginPage = () => {
     }
     try {
       await login(email, password)
-      navigate(from, { replace: true })
+      const currentUser = useAuthStore.getState().user
+      if (currentUser?.rol === 'admin') {
+        navigate('/panel/admin/asesores', { replace: true })
+      } else {
+        navigate(from, { replace: true })
+      }
     } catch (err: any) {
       setError(err?.message || 'Credenciales inválidas')
     }

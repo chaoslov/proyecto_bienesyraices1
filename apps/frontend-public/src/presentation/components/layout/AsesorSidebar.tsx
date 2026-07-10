@@ -2,14 +2,19 @@ import { Link, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/application/store/authStore'
 import { useUIStore } from '@/application/store/uiStore'
 import {
-  LayoutDashboard, Building2, MessageSquare, User, LogOut,
+  LayoutDashboard, Building2, MessageSquare, User, LogOut, Users,
 } from 'lucide-react'
 
-const enlaces = [
+const asesorEnlaces = [
   { to: '/panel', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/panel/propiedades', icon: Building2, label: 'Mis Propiedades' },
   { to: '/panel/mensajes', icon: MessageSquare, label: 'Mensajes' },
   { to: '/panel/perfil', icon: User, label: 'Mi Perfil' },
+]
+
+const adminEnlaces = [
+  { to: '/panel/admin/asesores', icon: Users, label: 'Admin Asesores' },
+  { to: '/panel/admin/mensajes', icon: MessageSquare, label: 'Mensajes' },
 ]
 
 function esActivo(path: string, to: string): boolean {
@@ -24,6 +29,8 @@ export const AsesorSidebar = () => {
   const { panelAbierto, cerrarPanel } = useUIStore()
   const location = useLocation()
   const { user, logout } = useAuthStore()
+  const isAdmin = user?.rol === 'admin'
+  const enlaces = isAdmin ? adminEnlaces : asesorEnlaces
 
   if (!user) return null
 
@@ -51,7 +58,7 @@ export const AsesorSidebar = () => {
               )}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">{user.asesor?.nombre || 'Asesor'}</p>
+              <p className="text-sm font-semibold truncate">{isAdmin ? 'Admin' : (user.asesor?.nombre || 'Asesor')}</p>
               <p className="text-xs text-white/70 truncate">{user.email}</p>
             </div>
           </div>

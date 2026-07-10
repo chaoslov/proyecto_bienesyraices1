@@ -1,46 +1,40 @@
 import { IUserRepository } from '../../domain/ports/IUserRepository'
+import { IPasswordHasher } from '../../domain/ports/IPasswordHasher'
+import { ITokenService } from '../../domain/ports/ITokenService'
 import { loginSchema } from '../validations/auth.validation'
-import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
-import { ZodError } from 'zod'
-
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-in-production'
+import { AppError } from './AppError'
 
 export class AuthService {
-  constructor(private userRepository: IUserRepository) {}
+  constructor(
+    private userRepository: IUserRepository,
+    private passwordHasher: IPasswordHasher,
+    private tokenService: ITokenService,
+  ) {}
 
-  async login(data: any) {
-    try {
-      const { email, password } = loginSchema.parse(data)
+  async login(data: unknown) {
+    const { email, password } = loginSchema.parse(data)
+    const user = await this.userRepository.findByEmail(email)
+    if (!user) throw new AppError(401, 'Credenciales inválidas')
+    if (!user.activo) throw new AppError(401, 'Usuario desactivado')
 
-      const user = await this.userRepository.findByEmail(email)
-      if (!user) throw { status: 401, message: 'Credenciales inválidas' }
-      if (!user.activo) throw { status: 401, message: 'Usuario desactivado' }
+    const passwordValido = await this.passwordHasher.compare(password, user.password)
+    if (!passwordValido) throw new AppError(401, 'Credenciales inválidas')
 
-      const passwordValido = await bcrypt.compare(password, user.password)
-      if (!passwordValido) throw { status: 401, message: 'Credenciales inválidas' }
+    const token = this.tokenService.sign({
+      id: user.id,
+      email: user.email,
+      rol: user.rol,
+      asesorId: user.asesor?.id || null,
+      adminId: user.admin?.id || null,
+    })
 
-      const token = jwt.sign(
-        { id: user.id, email: user.email, rol: user.rol, asesorId: user.asesor?.id || null },
-        JWT_SECRET,
-        { expiresIn: '7d' },
-      )
-
-      const { password: _, ...userSinPassword } = user
-
-      return { token, user: userSinPassword }
-    } catch (error) {
-      if (error instanceof ZodError) {
-        throw { status: 400, message: 'Datos inválidos', errors: error.issues }
-      }
-      throw error
-    }
+    const { password: _, ...userSinPassword } = user
+    return { token, user: userSinPassword }
   }
 
   async me(userId: string) {
     const user = await this.userRepository.findById(userId)
-    if (!user) throw { status: 404, message: 'Usuario no encontrado' }
-
+    if (!user) throw new AppError(404, 'Usuario no encontrado')
     const { password: _, ...userSinPassword } = user
     return userSinPassword
   }

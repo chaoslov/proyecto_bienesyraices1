@@ -15,6 +15,10 @@ export interface User {
     añosExperiencia?: number
     _count?: { propiedades: number }
   } | null
+  admin?: {
+    id: string
+    nombre: string
+  } | null
 }
 
 interface AuthState {

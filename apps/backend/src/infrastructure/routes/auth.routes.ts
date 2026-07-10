@@ -2,10 +2,14 @@ import { Router } from 'express'
 import { AuthController } from '../controllers/AuthController'
 import { AuthService } from '../../application/services/AuthService'
 import { UserRepository } from '../repositories/UserRepository'
+import { BcryptPasswordHasher } from '../auth/BcryptPasswordHasher'
+import { JwtTokenService } from '../auth/JwtTokenService'
 import { requireAuth } from '../middlewares/authMiddleware'
 
-const repository = new UserRepository()
-const service = new AuthService(repository)
+const userRepo = new UserRepository()
+const passwordHasher = new BcryptPasswordHasher()
+const tokenService = new JwtTokenService()
+const service = new AuthService(userRepo, passwordHasher, tokenService)
 const controller = new AuthController(service)
 
 const router = Router()

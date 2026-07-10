@@ -31,7 +31,7 @@ export const Navbar = () => {
               {user?.asesor?.foto ? (
                 <img src={user.asesor.foto} alt="" className="w-full h-full object-cover" />
               ) : (
-                user?.asesor?.nombre?.charAt(0) || 'A'
+                user?.asesor?.nombre?.charAt(0) || user?.email?.charAt(0).toUpperCase() || 'A'
               )}
             </button>
           )}
@@ -83,11 +83,11 @@ export const Navbar = () => {
                     {user?.asesor?.foto ? (
                       <img src={user.asesor.foto} alt="" className="w-full h-full object-cover" />
                     ) : (
-                      user?.asesor?.nombre?.charAt(0) || 'A'
+                      user?.asesor?.nombre?.charAt(0) || user?.email?.charAt(0).toUpperCase() || 'A'
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">{user?.asesor?.nombre || 'Asesor'}</p>
+                    <p className="text-sm font-medium text-gray-800 truncate">{user?.asesor?.nombre || 'Admin'}</p>
                     <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                   </div>
                 </div>
