@@ -35,10 +35,3 @@ export function getAsesorId(req: Request): string {
   }
   return req.user.asesorId
 }
-
-export function getAdminId(req: Request): string {
-  if (!req.user?.adminId) {
-    throw { status: 403, message: 'Acción solo para administradores' }
-  }
-  return req.user.adminId
-}
