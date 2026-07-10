@@ -44,6 +44,9 @@ export function mapFiltrosParaAPI(filtros: Record<string, any>): Record<string, 
   if (filtros.habitaciones) params.habitaciones = filtros.habitaciones
   if (filtros.ciudad) params.ciudad = filtros.ciudad
   if (filtros.sector) params.sector = filtros.sector
+  if (filtros.banos) params.banios = filtros.banos
+  if (filtros.areaMin) params.metrajeMin = filtros.areaMin
+  if (filtros.areaMax) params.metrajeMax = filtros.areaMax
   if (filtros.busqueda) params.busqueda = filtros.busqueda
   if (filtros.asesorId) params.asesorId = filtros.asesorId
   return params

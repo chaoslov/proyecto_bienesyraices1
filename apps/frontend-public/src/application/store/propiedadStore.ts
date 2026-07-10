@@ -73,7 +73,8 @@ export const usePropiedadStore = create<PropiedadState>((set, get) => ({
         const term = filtros.busqueda.toLowerCase()
         const titulo = prop.titulo.toLowerCase()
         const desc = prop.descripcion.toLowerCase()
-        if (!titulo.includes(term) && !desc.includes(term)) return false
+        const sector = prop.ubicacion.sector?.toLowerCase() || ''
+        if (!titulo.includes(term) && !desc.includes(term) && !sector.includes(term)) return false
       }
       return true
     })
@@ -86,33 +87,16 @@ export const usePropiedadStore = create<PropiedadState>((set, get) => ({
     const LIMIT = 12
     try {
       const { filtros } = get()
-      const result = await PropiedadApi.listar(filtros, 1, 100)
-      set({ propiedades: result.data, total: result.total, page: result.page, loading: false })
-      const todasFiltradas = get().aplicarFiltros()
-      const totalFiltradas = todasFiltradas.length
-      const totalPages = Math.ceil(totalFiltradas / LIMIT) || 1
-      const safePage = Math.min(page, totalPages)
-      const start = (safePage - 1) * LIMIT
+      const result = await PropiedadApi.listar(filtros, page, LIMIT)
       set({
-        propiedades: todasFiltradas.slice(start, start + LIMIT),
-        total: totalFiltradas,
-        page: safePage,
+        propiedades: result.data,
+        total: result.total,
+        page: result.page,
         loading: false,
       })
-    } catch (err: any) {
+    } catch {
       const mocks = propiedadesMock.filter((p) => p.publicada)
-      set({ propiedades: mocks, total: mocks.length, loading: false })
-      const todasFiltradas = get().aplicarFiltros()
-      const totalFiltradas = todasFiltradas.length
-      const totalPages = Math.ceil(totalFiltradas / LIMIT) || 1
-      const safePage = Math.min(page, totalPages)
-      const start = (safePage - 1) * LIMIT
-      set({
-        propiedades: todasFiltradas.slice(start, start + LIMIT),
-        total: totalFiltradas,
-        page: safePage,
-        loading: false,
-      })
+      set({ propiedades: mocks, total: mocks.length, page: 1, loading: false })
     }
   },
 

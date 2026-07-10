@@ -43,6 +43,7 @@ export class PropiedadRepository implements IPropiedadRepository {
       where.OR = [
         { titulo: { contains: busqueda, mode: 'insensitive' } },
         { descripcion: { contains: busqueda, mode: 'insensitive' } },
+        { ubicacion: { sector: { contains: busqueda, mode: 'insensitive' } } },
       ]
     }
 
